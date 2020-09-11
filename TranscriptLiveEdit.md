@@ -1,7 +1,7 @@
 <!--
 
 author: Alexander Buhl
-version: 1.0.1
+version: 2.0.0
 
 comment: Both a youtube player and a transcript download and edit tool designed to assist presentation teaching in university.
 
