@@ -5448,7 +5448,7 @@ var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
-		{F: 0.0, B: '6Af6b_wyiwI', e: $author$project$Main$Fresh},
+		{A: 0.0, C: '6Af6b_wyiwI', e: $author$project$Main$Fresh},
 		$elm$core$Platform$Cmd$none);
 };
 var $author$project$Main$Player_Loaded = {$: 4};
@@ -8089,18 +8089,15 @@ var $author$project$Main$update = F2(
 							_Utils_update(
 								model,
 								{
-									F: position,
+									A: position,
 									e: A3($author$project$Main$Received, cues, id, $author$project$Main$No)
 								}),
 							$elm$core$Platform$Cmd$none);
 					} else {
-						var cues = _v6.a;
-						var id = _v6.b;
-						var _v7 = _v6.c;
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
-								{F: position}),
+								{A: position}),
 							$author$project$Main$send_to_yt_API(
 								$elm$core$String$concat(
 									_List_fromArray(
@@ -8115,21 +8112,29 @@ var $author$project$Main$update = F2(
 				}
 			case 5:
 				var second = msg.a;
-				var _v8 = model.e;
-				return $author$project$Main$doNothing(model);
+				var _v7 = model.e;
+				if (_v7.$ === 6) {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{A: second}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return $author$project$Main$doNothing(model);
+				}
 			case 2:
-				var _v9 = model.e;
-				switch (_v9.$) {
+				var _v8 = model.e;
+				switch (_v8.$) {
 					case 5:
-						var id = _v9.a;
+						var id = _v8.a;
 						return $author$project$Main$doNothing(model);
 					case 4:
-						var id = _v9.a;
+						var id = _v8.a;
 						return $author$project$Main$doNothing(model);
 					default:
-						var _v10 = $author$project$Main$validate_id(model.B);
-						if (!_v10.$) {
-							var video_id = _v10.a;
+						var _v9 = $author$project$Main$validate_id(model.C);
+						if (!_v9.$) {
+							var video_id = _v9.a;
 							return _Utils_Tuple2(
 								_Utils_update(
 									model,
@@ -8148,10 +8153,10 @@ var $author$project$Main$update = F2(
 			case 1:
 				var who = msg.a;
 				var _new = msg.b;
-				var _v11 = model.e;
-				if ((_v11.$ === 6) && (_v11.c.$ === 1)) {
-					var cues = _v11.a;
-					var id = _v11.b;
+				var _v10 = model.e;
+				if ((_v10.$ === 6) && (_v10.c.$ === 1)) {
+					var cues = _v10.a;
+					var id = _v10.b;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
@@ -8171,11 +8176,11 @@ var $author$project$Main$update = F2(
 				}
 			default:
 				var _new = msg.a;
-				var _v12 = model.e;
-				if ((_v12.$ === 6) && (_v12.c.$ === 1)) {
-					var cues = _v12.a;
-					var id = _v12.b;
-					var who = _v12.c.a;
+				var _v11 = model.e;
+				if ((_v11.$ === 6) && (_v11.c.$ === 1)) {
+					var cues = _v11.a;
+					var id = _v11.b;
+					var who = _v11.c.a;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
@@ -8187,7 +8192,7 @@ var $author$project$Main$update = F2(
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{B: _new}),
+							{C: _new}),
 						$elm$core$Platform$Cmd$none);
 				}
 		}
@@ -8343,7 +8348,7 @@ var $author$project$Main$field_and_buttons = F3(
 						]),
 					_List_fromArray(
 						[
-							$author$project$Main$url_field(model.B),
+							$author$project$Main$url_field(model.C),
 							$author$project$Main$fetch_button,
 							$author$project$Main$status_message(message),
 							A2(
@@ -8374,7 +8379,7 @@ var $author$project$Main$field_and_buttons = F3(
 					_List_Nil,
 					_List_fromArray(
 						[
-							$author$project$Main$url_field(model.B),
+							$author$project$Main$url_field(model.C),
 							$author$project$Main$fetch_button,
 							$author$project$Main$status_message(message)
 						]))
@@ -8532,7 +8537,7 @@ var $author$project$Main$view = function (model) {
 							_Utils_ap($author$project$Main$common_style_text, $author$project$Main$common_style_container)),
 						A2(
 							$elm$core$List$indexedMap,
-							A2($author$project$Main$generate_html_from_cue, model.F, edit),
+							A2($author$project$Main$generate_html_from_cue, model.A, edit),
 							cues))
 					]));
 	}
