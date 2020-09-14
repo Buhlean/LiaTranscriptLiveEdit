@@ -26,10 +26,9 @@ script: https://cdn.jsdelivr.net/gh/Buhlean/LiaTranscriptLiveEdit/src/ElmModule.
 
 -->
 
-### Module TranscriptLiveEdit
+[![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://raw.githubusercontent.com/Buhlean/LiaTranscriptLiveEdit/master/Module.md)
 
-**Rendered version here:**<br/>
-https://liascript.github.io/course/?https://raw.githubusercontent.com/Buhlean/LiaTranscriptLiveEdit/master/Module.md
+### Module TranscriptLiveEdit
 
 **Example IDs:**
 * 5p-SsuTm130
