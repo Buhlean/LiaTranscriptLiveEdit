@@ -12,11 +12,15 @@ script: https://cdn.jsdelivr.net/gh/Buhlean/LiaTranscriptLiveEdit/src/ElmModule.
 <div id="player"></div>
 <div id="ElmHook"></div>
 <script>
-  try{
-    startElm();
-  }catch(e){
-    setTimeout(startELm, 5000);
+  function startupElm(){
+    try{
+      startElm();
+    }catch(e){
+      console.log("Loading")
+      setTimeout(startupELm, 500);
+    }
   }
+  startupElm()
 </script>
 @end
 
