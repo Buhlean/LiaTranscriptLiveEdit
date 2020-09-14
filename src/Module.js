@@ -101,7 +101,7 @@ function onPlayerReady(event) {
 var timerId;
 function stateChanged(event){
   if(event.data == 1){
-    timerId = setInterval(regularly_report_time, 2000);
+    timerId = setInterval(regularly_report_time, 800);
   }
   else{
     clearInterval(timerId);
