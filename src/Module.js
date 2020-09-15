@@ -1,7 +1,6 @@
 
 var loadedAPI = false;
 var loadedPlayer = false;
-var startedPlaying = false;
 var video_id = "";
 var app;
 
@@ -31,6 +30,10 @@ function startElm(){
       pauseVideo(); }
   });
   console.log("Subscribed to port!");
+  let style = document.createElement('style');
+  style.innerHTML = "[alt]{position:relative;display:inline-flex;justify-content:center;}[alt]:focus::after{content:attr(alt);position:absolute;top:125%;left:95%;color:#fff;background-color:#333;width:200%;padding:10px;font-size:0.9em;}";
+  let ref = document.querySelector('script');
+  ref.parentNode.insertBefore(style, ref);
 }
 function playVideo() {
   console.log("play");
@@ -51,7 +54,6 @@ function seekTo(seconds) {
 function create_and_change_player(id) {
   console.log("create");
   loadedPlayer = false;
-  startedPlaying = false;
   if (typeof(id) === 'string') {
     console.log("type correct");
     video_id = id;
@@ -108,7 +110,7 @@ function stateChanged(event){
   }
 }
 function regularly_report_time(){
-    let second = Math.floor(player.getCurrentTime());
+    let second = player.getCurrentTime();
     console.log("time: "+second);
     app.ports.receive_msg_from_API.send(second);
 }
