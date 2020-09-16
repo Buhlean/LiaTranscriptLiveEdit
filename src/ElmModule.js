@@ -784,11 +784,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.y.G === region.Y.G)
+	if (region.z.G === region.Y.G)
 	{
-		return 'on line ' + region.y.G;
+		return 'on line ' + region.z.G;
 	}
-	return 'on lines ' + region.y.G + ' through ' + region.Y.G;
+	return 'on lines ' + region.z.G + ' through ' + region.Y.G;
 }
 
 
@@ -1857,9 +1857,9 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.a$,
-		impl.bf,
-		impl.bc,
+		impl.a1,
+		impl.bl,
+		impl.bi,
 		function() { return function() {} }
 	);
 });
@@ -2704,7 +2704,7 @@ var _VirtualDom_mapEventTuple = F2(function(func, tuple)
 var _VirtualDom_mapEventRecord = F2(function(func, record)
 {
 	return {
-		r: func(record.r),
+		s: func(record.s),
 		Q: record.Q,
 		O: record.O
 	}
@@ -2974,7 +2974,7 @@ function _VirtualDom_makeCallback(eventNode, initialHandler)
 		// 3 = Custom
 
 		var value = result.a;
-		var message = !tag ? value : tag < 3 ? value.a : value.r;
+		var message = !tag ? value : tag < 3 ? value.a : value.s;
 		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.Q;
 		var currentEventNode = (
 			stopPropagation && event.stopPropagation(),
@@ -3928,11 +3928,11 @@ var _Browser_element = _Debugger_element || F4(function(impl, flagDecoder, debug
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.a$,
-		impl.bf,
-		impl.bc,
+		impl.a1,
+		impl.bl,
+		impl.bi,
 		function(sendToApp, initialModel) {
-			var view = impl.bh;
+			var view = impl.bn;
 			/**/
 			var domNode = args['node'];
 			//*/
@@ -3964,12 +3964,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.a$,
-		impl.bf,
-		impl.bc,
+		impl.a1,
+		impl.bl,
+		impl.bi,
 		function(sendToApp, initialModel) {
 			var divertHrefToApp = impl.P && impl.P(sendToApp)
-			var view = impl.bh;
+			var view = impl.bn;
 			var title = _VirtualDom_doc.title;
 			var bodyNode = _VirtualDom_doc.body;
 			var currNode = _VirtualDom_virtualize(bodyNode);
@@ -3982,7 +3982,7 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
 				_VirtualDom_divertHrefToApp = 0;
-				(title !== doc.be) && (_VirtualDom_doc.title = title = doc.be);
+				(title !== doc.bk) && (_VirtualDom_doc.title = title = doc.bk);
 			});
 		}
 	);
@@ -4038,8 +4038,8 @@ function _Browser_makeAnimator(model, draw)
 
 function _Browser_application(impl)
 {
-	var onUrlChange = impl.a3;
-	var onUrlRequest = impl.a4;
+	var onUrlChange = impl.a8;
+	var onUrlRequest = impl.a9;
 	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
 
 	return _Browser_document({
@@ -4069,13 +4069,13 @@ function _Browser_application(impl)
 				}
 			});
 		},
-		a$: function(flags)
+		a1: function(flags)
 		{
-			return A3(impl.a$, flags, _Browser_getUrl(), key);
+			return A3(impl.a1, flags, _Browser_getUrl(), key);
 		},
-		bh: impl.bh,
-		bf: impl.bf,
-		bc: impl.bc
+		bn: impl.bn,
+		bl: impl.bl,
+		bi: impl.bi
 	});
 }
 
@@ -4141,17 +4141,17 @@ var _Browser_decodeEvent = F2(function(decoder, event)
 function _Browser_visibilityInfo()
 {
 	return (typeof _VirtualDom_doc.hidden !== 'undefined')
-		? { aZ: 'hidden', aT: 'visibilitychange' }
+		? { a_: 'hidden', aU: 'visibilitychange' }
 		:
 	(typeof _VirtualDom_doc.mozHidden !== 'undefined')
-		? { aZ: 'mozHidden', aT: 'mozvisibilitychange' }
+		? { a_: 'mozHidden', aU: 'mozvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.msHidden !== 'undefined')
-		? { aZ: 'msHidden', aT: 'msvisibilitychange' }
+		? { a_: 'msHidden', aU: 'msvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.webkitHidden !== 'undefined')
-		? { aZ: 'webkitHidden', aT: 'webkitvisibilitychange' }
-		: { aZ: 'hidden', aT: 'visibilitychange' };
+		? { a_: 'webkitHidden', aU: 'webkitvisibilitychange' }
+		: { a_: 'hidden', aU: 'visibilitychange' };
 }
 
 
@@ -4316,7 +4316,7 @@ function _Browser_getElement(id)
 				aM: _Browser_doc.documentElement.clientWidth,
 				ad: _Browser_doc.documentElement.clientHeight
 			},
-			aW: {
+			aX: {
 				aN: x + rect.left,
 				aO: y + rect.top,
 				aM: rect.width,
@@ -4365,19 +4365,19 @@ var _Http_toTask = F3(function(router, toTask, request)
 	return _Scheduler_binding(function(callback)
 	{
 		function done(response) {
-			callback(toTask(request.aX.a(response)));
+			callback(toTask(request.aY.a(response)));
 		}
 
 		var xhr = new XMLHttpRequest();
 		xhr.addEventListener('error', function() { done($elm$http$Http$NetworkError_); });
 		xhr.addEventListener('timeout', function() { done($elm$http$Http$Timeout_); });
-		xhr.addEventListener('load', function() { done(_Http_toResponse(request.aX.b, xhr)); });
+		xhr.addEventListener('load', function() { done(_Http_toResponse(request.aY.b, xhr)); });
 		$elm$core$Maybe$isJust(request.aI) && _Http_track(router, xhr, request.aI.a);
 
 		try {
-			xhr.open(request.a1, request.bg, true);
+			xhr.open(request.a4, request.bm, true);
 		} catch (e) {
-			return done($elm$http$Http$BadUrl_(request.bg));
+			return done($elm$http$Http$BadUrl_(request.bm));
 		}
 
 		_Http_configureRequest(xhr, request);
@@ -4398,8 +4398,8 @@ function _Http_configureRequest(xhr, request)
 	{
 		xhr.setRequestHeader(headers.a.a, headers.a.b);
 	}
-	xhr.timeout = request.bd.a || 0;
-	xhr.responseType = request.aX.d;
+	xhr.timeout = request.bj.a || 0;
+	xhr.responseType = request.aY.d;
 	xhr.withCredentials = request.aQ;
 }
 
@@ -4421,9 +4421,9 @@ function _Http_toResponse(toBody, xhr)
 function _Http_toMetadata(xhr)
 {
 	return {
-		bg: xhr.responseURL,
-		ba: xhr.status,
-		bb: xhr.statusText,
+		bm: xhr.responseURL,
+		bf: xhr.status,
+		bg: xhr.statusText,
 		ac: _Http_parseHeaders(xhr.getAllResponseHeaders())
 	};
 }
@@ -4519,14 +4519,14 @@ function _Http_track(router, xhr, tracker)
 	xhr.upload.addEventListener('progress', function(event) {
 		if (xhr.c) { return; }
 		_Scheduler_rawSpawn(A2($elm$core$Platform$sendToSelf, router, _Utils_Tuple2(tracker, $elm$http$Http$Sending({
-			a9: event.loaded,
+			be: event.loaded,
 			aE: event.total
 		}))));
 	});
 	xhr.addEventListener('progress', function(event) {
 		if (xhr.c) { return; }
 		_Scheduler_rawSpawn(A2($elm$core$Platform$sendToSelf, router, _Utils_Tuple2(tracker, $elm$http$Http$Receiving({
-			a6: event.loaded,
+			bb: event.loaded,
 			aE: event.lengthComputable ? $elm$core$Maybe$Just(event.total) : $elm$core$Maybe$Nothing
 		}))));
 	});
@@ -5448,7 +5448,7 @@ var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
-		{A: 0.0, C: '6Af6b_wyiwI', e: $author$project$Main$Fresh},
+		{B: 0.0, n: '6Af6b_wyiwI', e: $author$project$Main$Fresh},
 		$elm$core$Platform$Cmd$none);
 };
 var $author$project$Main$Player_Loaded = {$: 4};
@@ -5458,8 +5458,8 @@ var $author$project$Main$Player_Time_At = function (a) {
 var $author$project$Main$loaded_or_position = function (msg) {
 	return (msg < 0) ? $author$project$Main$Player_Loaded : $author$project$Main$Player_Time_At(msg);
 };
-var $elm$json$Json$Decode$int = _Json_decodeInt;
-var $author$project$Main$receive_msg_from_API = _Platform_incomingPort('receive_msg_from_API', $elm$json$Json$Decode$int);
+var $elm$json$Json$Decode$float = _Json_decodeFloat;
+var $author$project$Main$receive_msg_from_API = _Platform_incomingPort('receive_msg_from_API', $elm$json$Json$Decode$float);
 var $author$project$Main$subscriptions = function (_v0) {
 	return $author$project$Main$receive_msg_from_API($author$project$Main$loaded_or_position);
 };
@@ -6080,7 +6080,7 @@ var $elm$http$Http$resolve = F2(
 			case 3:
 				var metadata = response.a;
 				return $elm$core$Result$Err(
-					$elm$http$Http$BadStatus(metadata.ba));
+					$elm$http$Http$BadStatus(metadata.bf));
 			default:
 				var body = response.b;
 				return A2(
@@ -6234,12 +6234,12 @@ var $elm$http$Http$cmdMap = F2(
 				{
 					aQ: r.aQ,
 					aS: r.aS,
-					aX: A2(_Http_mapExpect, func, r.aX),
+					aY: A2(_Http_mapExpect, func, r.aY),
 					ac: r.ac,
-					a1: r.a1,
-					bd: r.bd,
+					a4: r.a4,
+					bj: r.bj,
 					aI: r.aI,
-					bg: r.bg
+					bm: r.bm
 				});
 		}
 	});
@@ -6262,20 +6262,21 @@ var $elm$http$Http$subscription = _Platform_leaf('Http');
 var $elm$http$Http$request = function (r) {
 	return $elm$http$Http$command(
 		$elm$http$Http$Request(
-			{aQ: false, aS: r.aS, aX: r.aX, ac: r.ac, a1: r.a1, bd: r.bd, aI: r.aI, bg: r.bg}));
+			{aQ: false, aS: r.aS, aY: r.aY, ac: r.ac, a4: r.a4, bj: r.bj, aI: r.aI, bm: r.bm}));
 };
 var $elm$http$Http$get = function (r) {
 	return $elm$http$Http$request(
-		{aS: $elm$http$Http$emptyBody, aX: r.aX, ac: _List_Nil, a1: 'GET', bd: $elm$core$Maybe$Nothing, aI: $elm$core$Maybe$Nothing, bg: r.bg});
+		{aS: $elm$http$Http$emptyBody, aY: r.aY, ac: _List_Nil, a4: 'GET', bj: $elm$core$Maybe$Nothing, aI: $elm$core$Maybe$Nothing, bm: r.bm});
 };
 var $author$project$Main$fetch_transcript = function (video_id) {
 	return $elm$http$Http$get(
 		{
-			aX: $elm$http$Http$expectString($author$project$Main$GotCues),
-			bg: 'https://video.google.com/timedtext?v=' + (video_id + '&lang=en')
+			aY: $elm$http$Http$expectString($author$project$Main$GotCues),
+			bm: 'https://video.google.com/timedtext?v=' + (video_id + '&lang=en')
 		});
 };
-var $author$project$Main$empty_cue = {u: '>> ', L: 0.0, y: 0.0};
+var $elm$core$String$fromFloat = _String_fromNumber;
+var $author$project$Main$empty_cue = {v: '>> ', L: 0.0, z: 0.0};
 var $elm$core$String$replace = F3(
 	function (before, after, string) {
 		return A2(
@@ -6303,9 +6304,9 @@ var $author$project$Main$extract_information = function (node) {
 		var _v3 = node.c;
 		var cue_text = _v3.a.a;
 		return {
-			u: A3($elm$core$String$replace, '&#39;', '\'', cue_text) + ' ',
+			v: A3($elm$core$String$replace, '&#39;', '\'', cue_text) + ' ',
 			L: A2($author$project$Main$toFloat_with_default, duration_attr.aK, 0.0),
-			y: A2($author$project$Main$toFloat_with_default, start_attr.aK, 0.0)
+			z: A2($author$project$Main$toFloat_with_default, start_attr.aK, 0.0)
 		};
 	} else {
 		return $author$project$Main$empty_cue;
@@ -6388,7 +6389,7 @@ var $elm$parser$Parser$Advanced$run = F2(
 	});
 var $jinjor$elm_xml_parser$XmlParser$Xml = F3(
 	function (processingInstructions, docType, root) {
-		return {X: docType, as: processingInstructions, a8: root};
+		return {X: docType, as: processingInstructions, bd: root};
 	});
 var $elm$parser$Parser$Advanced$Bad = F2(
 	function (a, b) {
@@ -6406,7 +6407,7 @@ var $elm$parser$Parser$Advanced$AddRight = F2(
 	});
 var $elm$parser$Parser$Advanced$DeadEnd = F4(
 	function (row, col, problem, contextStack) {
-		return {U: col, aU: contextStack, ap: problem, aB: row};
+		return {U: col, aV: contextStack, ap: problem, aB: row};
 	});
 var $elm$parser$Parser$Advanced$Empty = {$: 0};
 var $elm$parser$Parser$Advanced$fromInfo = F4(
@@ -6981,7 +6982,7 @@ var $jinjor$elm_xml_parser$XmlParser$Text = function (a) {
 };
 var $jinjor$elm_xml_parser$XmlParser$Attribute = F2(
 	function (name, value) {
-		return {a2: name, aK: value};
+		return {a6: name, aK: value};
 	});
 var $jinjor$elm_xml_parser$XmlParser$attributeName = A2(
 	$elm$parser$Parser$Advanced$inContext,
@@ -7430,7 +7431,7 @@ var $jinjor$elm_xml_parser$XmlParser$attributes = function (keys) {
 					A2(
 					$elm$parser$Parser$Advanced$andThen,
 					function (attr) {
-						return A2($elm$core$Set$member, attr.a2, keys) ? $jinjor$elm_xml_parser$XmlParser$fail('attribute ' + (attr.a2 + ' is duplicated')) : A2(
+						return A2($elm$core$Set$member, attr.a6, keys) ? $jinjor$elm_xml_parser$XmlParser$fail('attribute ' + (attr.a6 + ' is duplicated')) : A2(
 							$elm$parser$Parser$Advanced$keeper,
 							A2(
 								$elm$parser$Parser$Advanced$ignorer,
@@ -7438,7 +7439,7 @@ var $jinjor$elm_xml_parser$XmlParser$attributes = function (keys) {
 									$elm$core$List$cons(attr)),
 								$jinjor$elm_xml_parser$XmlParser$whiteSpace),
 							$jinjor$elm_xml_parser$XmlParser$attributes(
-								A2($elm$core$Set$insert, attr.a2, keys)));
+								A2($elm$core$Set$insert, attr.a6, keys)));
 					},
 					$jinjor$elm_xml_parser$XmlParser$attribute),
 					$elm$parser$Parser$Advanced$succeed(_List_Nil)
@@ -7731,7 +7732,7 @@ var $elm$parser$Parser$Advanced$end = function (x) {
 var $jinjor$elm_xml_parser$XmlParser$end = $elm$parser$Parser$Advanced$end($elm$parser$Parser$ExpectingEnd);
 var $jinjor$elm_xml_parser$XmlParser$ProcessingInstruction = F2(
 	function (name, value) {
-		return {a2: name, aK: value};
+		return {a6: name, aK: value};
 	});
 var $jinjor$elm_xml_parser$XmlParser$processingInstructionName = A2(
 	$elm$parser$Parser$Advanced$inContext,
@@ -7950,7 +7951,7 @@ var $author$project$Main$parse_xml = function (xml) {
 		return $elm$core$Maybe$Nothing;
 	} else {
 		var result = _v0.a;
-		var _v1 = result.a8;
+		var _v1 = result.bd;
 		if (_v1.$ === 1) {
 			var text = _v1.a;
 			return $elm$core$Maybe$Nothing;
@@ -7966,14 +7967,13 @@ var $author$project$Main$parse_xml = function (xml) {
 		}
 	}
 };
-var $elm$core$Basics$round = _Basics_round;
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $author$project$Main$send_to_yt_API = _Platform_outgoingPort('send_to_yt_API', $elm$json$Json$Encode$string);
 var $author$project$Main$update_if = F4(
 	function (new_content, only_this_one_gets_changed, current_index, current_cue) {
 		return _Utils_eq(current_index, only_this_one_gets_changed) ? _Utils_update(
 			current_cue,
-			{u: new_content}) : current_cue;
+			{v: new_content}) : current_cue;
 	});
 var $author$project$Main$BadInput = 0;
 var $author$project$Main$EmptyString = 2;
@@ -8007,13 +8007,7 @@ var $author$project$Main$update = F2(
 				var _v1 = model.e;
 				if (_v1.$ === 4) {
 					var video_id = _v1.a;
-					return (video_id === 'default') ? _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								e: $author$project$Main$Loading_Cues(video_id)
-							}),
-						$author$project$Main$fetch_transcript('default')) : _Utils_Tuple2(
+					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{
@@ -8089,22 +8083,24 @@ var $author$project$Main$update = F2(
 							_Utils_update(
 								model,
 								{
-									A: position,
+									B: position,
 									e: A3($author$project$Main$Received, cues, id, $author$project$Main$No)
 								}),
 							$elm$core$Platform$Cmd$none);
 					} else {
+						var cues = _v6.a;
+						var id = _v6.b;
+						var _v7 = _v6.c;
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
-								{A: position}),
+								{B: position}),
 							$author$project$Main$send_to_yt_API(
 								$elm$core$String$concat(
 									_List_fromArray(
 										[
 											'Seek:',
-											$elm$core$String$fromInt(
-											$elm$core$Basics$round(position))
+											$elm$core$String$fromFloat(position)
 										]))));
 					}
 				} else {
@@ -8112,29 +8108,29 @@ var $author$project$Main$update = F2(
 				}
 			case 5:
 				var second = msg.a;
-				var _v7 = model.e;
-				if (_v7.$ === 6) {
+				var _v8 = model.e;
+				if (_v8.$ === 6) {
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{A: second}),
+							{B: second}),
 						$elm$core$Platform$Cmd$none);
 				} else {
 					return $author$project$Main$doNothing(model);
 				}
 			case 2:
-				var _v8 = model.e;
-				switch (_v8.$) {
+				var _v9 = model.e;
+				switch (_v9.$) {
 					case 5:
-						var id = _v8.a;
+						var id = _v9.a;
 						return $author$project$Main$doNothing(model);
 					case 4:
-						var id = _v8.a;
+						var id = _v9.a;
 						return $author$project$Main$doNothing(model);
 					default:
-						var _v9 = $author$project$Main$validate_id(model.C);
-						if (!_v9.$) {
-							var video_id = _v9.a;
+						var _v10 = $author$project$Main$validate_id(model.n);
+						if (!_v10.$) {
+							var video_id = _v10.a;
 							return _Utils_Tuple2(
 								_Utils_update(
 									model,
@@ -8153,10 +8149,10 @@ var $author$project$Main$update = F2(
 			case 1:
 				var who = msg.a;
 				var _new = msg.b;
-				var _v10 = model.e;
-				if ((_v10.$ === 6) && (_v10.c.$ === 1)) {
-					var cues = _v10.a;
-					var id = _v10.b;
+				var _v11 = model.e;
+				if ((_v11.$ === 6) && (_v11.c.$ === 1)) {
+					var cues = _v11.a;
+					var id = _v11.b;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
@@ -8176,11 +8172,11 @@ var $author$project$Main$update = F2(
 				}
 			default:
 				var _new = msg.a;
-				var _v11 = model.e;
-				if ((_v11.$ === 6) && (_v11.c.$ === 1)) {
-					var cues = _v11.a;
-					var id = _v11.b;
-					var who = _v11.c.a;
+				var _v12 = model.e;
+				if ((_v12.$ === 6) && (_v12.c.$ === 1)) {
+					var cues = _v12.a;
+					var id = _v12.b;
+					var who = _v12.c.a;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
@@ -8192,12 +8188,11 @@ var $author$project$Main$update = F2(
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{C: _new}),
+							{n: _new}),
 						$elm$core$Platform$Cmd$none);
 				}
 		}
 	});
-var $author$project$Main$box_width = 108;
 var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $author$project$Main$common_style_container = _List_fromArray(
@@ -8212,19 +8207,15 @@ var $author$project$Main$common_style_text = _List_fromArray(
 	[
 		A2($elm$html$Html$Attributes$style, 'font-size', '1.06em'),
 		A2($elm$html$Html$Attributes$style, 'color', '#000'),
-		A2($elm$html$Html$Attributes$style, 'font-family', 'Helvetica'),
 		A2($elm$html$Html$Attributes$style, 'line-height', '1.4')
 	]);
 var $elm$html$Html$div = _VirtualDom_node('div');
-var $author$project$Main$Validate_And_Fetch = {$: 2};
-var $elm$html$Html$button = _VirtualDom_node('button');
-var $author$project$Main$common_style_top = _List_fromArray(
-	[
-		A2($elm$html$Html$Attributes$style, 'margin', '2px'),
-		A2($elm$html$Html$Attributes$style, 'font-size', '1.06em'),
-		A2($elm$html$Html$Attributes$style, 'padding', '2px 2px 2px 2px'),
-		A2($elm$html$Html$Attributes$style, 'font-family', 'Helvetica')
-	]);
+var $author$project$Main$JumpTo = function (a) {
+	return {$: 6, a: a};
+};
+var $author$project$Main$Summon_Editor = function (a) {
+	return {$: 7, a: a};
+};
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
 		return A2(
@@ -8232,6 +8223,7 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			key,
 			$elm$json$Json$Encode$string(string));
 	});
+var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
 var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 0, a: a};
@@ -8250,37 +8242,44 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
+var $elm$html$Html$Events$onDoubleClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'dblclick',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $elm$html$Html$span = _VirtualDom_node('span');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
-var $author$project$Main$fetch_button = A2(
-	$elm$html$Html$button,
-	_Utils_ap(
-		_List_fromArray(
-			[
-				$elm$html$Html$Events$onClick($author$project$Main$Validate_And_Fetch),
-				$elm$html$Html$Attributes$id('button-fetches-transcript-by-id'),
-				A2($elm$html$Html$Attributes$style, 'width', '14ch')
-			]),
-		$author$project$Main$common_style_top),
-	_List_fromArray(
-		[
-			$elm$html$Html$text('Fetch transcript')
-		]));
-var $elm$virtual_dom$VirtualDom$lazy2 = _VirtualDom_lazy2;
-var $elm$html$Html$Lazy$lazy2 = $elm$virtual_dom$VirtualDom$lazy2;
-var $elm$html$Html$span = _VirtualDom_node('span');
-var $author$project$Main$status_message = function (message) {
-	return A2(
-		$elm$html$Html$span,
-		_Utils_ap(_List_Nil, $author$project$Main$common_style_top),
-		_List_fromArray(
-			[
-				$elm$html$Html$text(message)
-			]));
-};
-var $author$project$Main$ID_Changed = function (a) {
-	return {$: 0, a: a};
-};
+var $author$project$Main$create_cue_span = F3(
+	function (index, cue, highlight) {
+		return A2(
+			$elm$html$Html$span,
+			_List_fromArray(
+				[
+					$elm$html$Html$Events$onClick(
+					$author$project$Main$JumpTo(cue.z)),
+					$elm$html$Html$Events$onDoubleClick(
+					$author$project$Main$Summon_Editor(index)),
+					$elm$html$Html$Attributes$id(
+					'cue-' + $elm$core$String$fromInt(index)),
+					$elm$html$Html$Attributes$class('cue'),
+					A2(
+					$elm$html$Html$Attributes$style,
+					'background-color',
+					function (h) {
+						return h ? '#8CF' : '#FFF';
+					}(highlight))
+				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text(cue.v)
+				]));
+	});
+var $author$project$Main$Cue_Changed = F2(
+	function (a, b) {
+		return {$: 1, a: a, b: b};
+	});
 var $elm$html$Html$input = _VirtualDom_node('input');
 var $elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
@@ -8315,8 +8314,100 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 			$elm$html$Html$Events$alwaysStop,
 			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
 };
-var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
+var $elm$core$Basics$round = _Basics_round;
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $author$project$Main$create_editable_cue = F2(
+	function (index, cue) {
+		return A2(
+			$elm$html$Html$input,
+			_Utils_ap(
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onInput(
+						$author$project$Main$Cue_Changed(index)),
+						$elm$html$Html$Events$onDoubleClick(
+						$author$project$Main$JumpTo(cue.z)),
+						$elm$html$Html$Attributes$id(
+						'cue-input-' + $elm$core$String$fromInt(index)),
+						$elm$html$Html$Attributes$class('cue-input'),
+						$elm$html$Html$Attributes$value(cue.v),
+						A2(
+						$elm$html$Html$Attributes$style,
+						'min-width',
+						$elm$core$String$fromInt(
+							$elm$core$Basics$round(
+								$elm$core$String$length(cue.v) * 0.8)) + 'ch')
+					]),
+				$author$project$Main$common_style_text),
+			_List_Nil);
+	});
+var $author$project$Main$generate_html_from_cue = F4(
+	function (time_sec, whether_editing, index, cue) {
+		if (!whether_editing.$) {
+			return A3(
+				$author$project$Main$create_cue_span,
+				index,
+				cue,
+				(_Utils_cmp(cue.z, time_sec) < 1) && (_Utils_cmp(time_sec, cue.z + cue.L) < 0));
+		} else {
+			var number = whether_editing.a;
+			return _Utils_eq(index, number) ? A2($author$project$Main$create_editable_cue, index, cue) : A3($author$project$Main$create_cue_span, index, cue, false);
+		}
+	});
+var $elm$virtual_dom$VirtualDom$lazy = _VirtualDom_lazy;
+var $elm$html$Html$Lazy$lazy = $elm$virtual_dom$VirtualDom$lazy;
+var $author$project$Main$Validate_And_Fetch = {$: 2};
+var $elm$html$Html$button = _VirtualDom_node('button');
+var $author$project$Main$common_style_top = _List_fromArray(
+	[
+		A2($elm$html$Html$Attributes$style, 'margin', '2px'),
+		A2($elm$html$Html$Attributes$style, 'font-size', '1.06em'),
+		A2($elm$html$Html$Attributes$style, 'padding', '2px 2px 2px 2px')
+	]);
+var $author$project$Main$fetch_button = A2(
+	$elm$html$Html$button,
+	_Utils_ap(
+		_List_fromArray(
+			[
+				$elm$html$Html$Events$onClick($author$project$Main$Validate_And_Fetch),
+				$elm$html$Html$Attributes$id('button-fetches-transcript-by-id')
+			]),
+		$author$project$Main$common_style_top),
+	_List_fromArray(
+		[
+			$elm$html$Html$text('Fetch transcript')
+		]));
+var $author$project$Main$status_message = function (message) {
+	return A2(
+		$elm$html$Html$span,
+		_Utils_ap(_List_Nil, $author$project$Main$common_style_top),
+		_List_fromArray(
+			[
+				$elm$html$Html$text(message)
+			]));
+};
+var $elm$html$Html$Attributes$alt = $elm$html$Html$Attributes$stringProperty('alt');
+var $elm$html$Html$img = _VirtualDom_node('img');
+var $elm$html$Html$Attributes$src = function (url) {
+	return A2(
+		$elm$html$Html$Attributes$stringProperty,
+		'src',
+		_VirtualDom_noJavaScriptOrHtmlUri(url));
+};
+var $author$project$Main$tooltip_button = A2(
+	$elm$html$Html$img,
+	_Utils_ap(
+		$author$project$Main$common_style_top,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$src('https://raw.githubusercontent.com/Buhlean/LiaTranscriptLiveEdit/master/assets/info.png'),
+				$elm$html$Html$Attributes$alt('Enter a YouTube link or ID and press the \"Fetch\" button. Then click on any word in the transcript box to get transported to the point in the video where that word is said. Watching the video will do the same in reverse. You can edit the text by double-clicking any word as well.')
+			])),
+	_List_Nil);
+var $author$project$Main$ID_Changed = function (a) {
+	return {$: 0, a: a};
+};
+var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
 var $author$project$Main$url_field = function (id) {
 	return A2(
 		$elm$html$Html$input,
@@ -8332,181 +8423,62 @@ var $author$project$Main$url_field = function (id) {
 			$author$project$Main$common_style_top),
 		_List_Nil);
 };
-var $author$project$Main$field_and_buttons = F3(
-	function (model, player_controls, message) {
-		return player_controls ? A3(
-			$elm$html$Html$Lazy$lazy2,
-			$elm$html$Html$div,
-			_List_Nil,
-			_List_fromArray(
-				[
-					A2(
-					$elm$html$Html$div,
-					_List_fromArray(
-						[
-							A2($elm$html$Html$Attributes$style, 'height', '2.2em')
-						]),
-					_List_fromArray(
-						[
-							$author$project$Main$url_field(model.C),
-							$author$project$Main$fetch_button,
-							$author$project$Main$status_message(message),
-							A2(
-							$elm$html$Html$span,
-							_List_fromArray(
-								[
-									A2($elm$html$Html$Attributes$style, 'font-size', '1.0em'),
-									A2($elm$html$Html$Attributes$style, 'margin-top', '1ch'),
-									A2($elm$html$Html$Attributes$style, 'float', 'right'),
-									A2($elm$html$Html$Attributes$style, 'text-align', 'right')
-								]),
-							_List_fromArray(
-								[
-									$elm$html$Html$text('Click to jump, DoubleClick to edit')
-								]))
-						]))
-				])) : A3(
-			$elm$html$Html$Lazy$lazy2,
-			$elm$html$Html$div,
-			_List_fromArray(
-				[
-					A2($elm$html$Html$Attributes$style, 'height', '2.0em')
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$elm$html$Html$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$author$project$Main$url_field(model.C),
-							$author$project$Main$fetch_button,
-							$author$project$Main$status_message(message)
-						]))
-				]));
-	});
-var $author$project$Main$JumpTo = function (a) {
-	return {$: 6, a: a};
-};
-var $author$project$Main$Summon_Editor = function (a) {
-	return {$: 7, a: a};
-};
-var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
-var $elm$html$Html$Events$onDoubleClick = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'dblclick',
-		$elm$json$Json$Decode$succeed(msg));
-};
-var $author$project$Main$create_cue_span = F3(
-	function (index, cue, highlight) {
-		return A2(
-			$elm$html$Html$span,
-			_List_fromArray(
-				[
-					$elm$html$Html$Events$onClick(
-					$author$project$Main$JumpTo(cue.y)),
-					$elm$html$Html$Events$onDoubleClick(
-					$author$project$Main$Summon_Editor(index)),
-					$elm$html$Html$Attributes$id(
-					'cue-' + $elm$core$String$fromInt(index)),
-					$elm$html$Html$Attributes$class('cue'),
-					A2(
-					$elm$html$Html$Attributes$style,
-					'background-color',
-					function (h) {
-						return h ? '#8CF' : '#FFF';
-					}(highlight))
-				]),
-			_List_fromArray(
-				[
-					$elm$html$Html$text(cue.u)
-				]));
-	});
-var $author$project$Main$Cue_Changed = F2(
-	function (a, b) {
-		return {$: 1, a: a, b: b};
-	});
-var $author$project$Main$create_editable_cue = F2(
-	function (index, cue) {
-		return A2(
-			$elm$html$Html$input,
-			_Utils_ap(
-				_List_fromArray(
-					[
-						$elm$html$Html$Events$onInput(
-						$author$project$Main$Cue_Changed(index)),
-						$elm$html$Html$Events$onDoubleClick(
-						$author$project$Main$JumpTo(cue.y)),
-						$elm$html$Html$Attributes$id(
-						'cue-input-' + $elm$core$String$fromInt(index)),
-						$elm$html$Html$Attributes$class('cue-input'),
-						$elm$html$Html$Attributes$value(cue.u),
-						A2(
-						$elm$html$Html$Attributes$style,
-						'min-width',
-						$elm$core$String$fromInt(
-							$elm$core$Basics$round(
-								$elm$core$String$length(cue.u) * 0.8)) + 'ch')
-					]),
-				$author$project$Main$common_style_text),
-			_List_Nil);
-	});
-var $author$project$Main$generate_html_from_cue = F4(
-	function (time_sec, whether_editing, index, cue) {
-		if (!whether_editing.$) {
-			return A3(
-				$author$project$Main$create_cue_span,
-				index,
-				cue,
-				(_Utils_cmp(cue.y, time_sec) < 1) && (_Utils_cmp(time_sec, cue.y + cue.L) < 0));
-		} else {
-			var number = whether_editing.a;
-			return _Utils_eq(index, number) ? A2($author$project$Main$create_editable_cue, index, cue) : A3($author$project$Main$create_cue_span, index, cue, false);
-		}
-	});
-var $elm$virtual_dom$VirtualDom$lazy = _VirtualDom_lazy;
-var $elm$html$Html$Lazy$lazy = $elm$virtual_dom$VirtualDom$lazy;
 var $author$project$Main$unloaded_elements = F2(
-	function (model, text) {
+	function (input_field, msg) {
 		return A2(
 			$elm$html$Html$div,
 			_List_fromArray(
 				[
-					A2(
-					$elm$html$Html$Attributes$style,
-					'width',
-					$elm$core$String$fromInt($author$project$Main$box_width) + 'ch')
+					A2($elm$html$Html$Attributes$style, 'width', '100%'),
+					A2($elm$html$Html$Attributes$style, 'font-family', 'Helvetica'),
+					A2($elm$html$Html$Attributes$style, 'display', 'flex'),
+					A2($elm$html$Html$Attributes$style, 'flex-wrap', 'wrap'),
+					A2($elm$html$Html$Attributes$style, 'align-items', 'center'),
+					A2($elm$html$Html$Attributes$style, 'align-content', 'flex-start')
 				]),
 			_List_fromArray(
 				[
-					A3($author$project$Main$field_and_buttons, model, false, text),
-					A2(
-					$elm$html$Html$div,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$id('player')
-						]),
-					_List_Nil)
+					$author$project$Main$tooltip_button,
+					$author$project$Main$url_field(input_field),
+					$author$project$Main$fetch_button,
+					$author$project$Main$status_message(msg)
 				]));
 	});
 var $author$project$Main$view = function (model) {
 	var _v0 = model.e;
 	switch (_v0.$) {
 		case 0:
-			return A3($elm$html$Html$Lazy$lazy2, $author$project$Main$unloaded_elements, model, '');
+			return A2(
+				$elm$html$Html$Lazy$lazy,
+				$author$project$Main$unloaded_elements(model.n),
+				'');
 		case 1:
-			return A3($elm$html$Html$Lazy$lazy2, $author$project$Main$unloaded_elements, model, 'Sorry, couldn\'t parse transcript!');
+			return A2(
+				$elm$html$Html$Lazy$lazy,
+				$author$project$Main$unloaded_elements(model.n),
+				'Sorry, couldn\'t parse transcript!');
 		case 2:
-			return A3($elm$html$Html$Lazy$lazy2, $author$project$Main$unloaded_elements, model, 'The link/ID is unrecognisable.');
+			return A2(
+				$elm$html$Html$Lazy$lazy,
+				$author$project$Main$unloaded_elements(model.n),
+				'The link/ID is unrecognisable.');
 		case 3:
-			return A3($elm$html$Html$Lazy$lazy2, $author$project$Main$unloaded_elements, model, 'Sorry, couldn\'t find transcript!');
+			return A2(
+				$elm$html$Html$Lazy$lazy,
+				$author$project$Main$unloaded_elements(model.n),
+				'Sorry, couldn\'t find transcript!');
 		case 4:
 			var video_id = _v0.a;
-			return A3($elm$html$Html$Lazy$lazy2, $author$project$Main$unloaded_elements, model, 'Loading...');
+			return A2(
+				$elm$html$Html$Lazy$lazy,
+				$author$project$Main$unloaded_elements(model.n),
+				'Loading...');
 		case 5:
 			var video_id = _v0.a;
-			return A3($elm$html$Html$Lazy$lazy2, $author$project$Main$unloaded_elements, model, 'Loading...');
+			return A2(
+				$elm$html$Html$Lazy$lazy,
+				$author$project$Main$unloaded_elements(model.n),
+				'Loading...');
 		default:
 			var cues = _v0.a;
 			var video_id = _v0.b;
@@ -8515,34 +8487,31 @@ var $author$project$Main$view = function (model) {
 				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						A2(
-						$elm$html$Html$Attributes$style,
-						'width',
-						$elm$core$String$fromInt($author$project$Main$box_width) + 'ch')
+						A2($elm$html$Html$Attributes$style, 'width', '100%')
 					]),
 				_List_fromArray(
 					[
 						A2(
 						$elm$html$Html$Lazy$lazy,
-						A2($author$project$Main$field_and_buttons, model, true),
+						$author$project$Main$unloaded_elements(model.n),
 						'Loaded: ' + video_id),
-						A3(
-						$elm$html$Html$Lazy$lazy2,
-						$elm$html$Html$div,
-						_Utils_ap(
-							_List_fromArray(
-								[
-									$elm$html$Html$Attributes$id('cues-container')
-								]),
-							_Utils_ap($author$project$Main$common_style_text, $author$project$Main$common_style_container)),
+						A2(
+						$elm$html$Html$Lazy$lazy,
+						$elm$html$Html$div(
+							_Utils_ap(
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$id('cues-container')
+									]),
+								_Utils_ap($author$project$Main$common_style_text, $author$project$Main$common_style_container))),
 						A2(
 							$elm$core$List$indexedMap,
-							A2($author$project$Main$generate_html_from_cue, model.A, edit),
+							A2($author$project$Main$generate_html_from_cue, model.B, edit),
 							cues))
 					]));
 	}
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
-	{a$: $author$project$Main$init, bc: $author$project$Main$subscriptions, bf: $author$project$Main$update, bh: $author$project$Main$view});
+	{a1: $author$project$Main$init, bi: $author$project$Main$subscriptions, bl: $author$project$Main$update, bn: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	$elm$json$Json$Decode$succeed(0))(0)}});}(this));
