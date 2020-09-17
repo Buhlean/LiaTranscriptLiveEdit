@@ -5448,7 +5448,7 @@ var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
-		{B: 0.0, n: '6Af6b_wyiwI', e: $author$project$Main$Fresh},
+		{B: 0.0, n: 'I7jf_U89ddk', e: $author$project$Main$Fresh},
 		$elm$core$Platform$Cmd$none);
 };
 var $author$project$Main$Player_Loaded = {$: 4};
