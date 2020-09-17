@@ -199,16 +199,18 @@ common_style_container =
   ]
 tooltip_button : Html Msg
 tooltip_button = a (common_style_top++
-  [ A.style "font-family" "Lucida Bright, Georgia, serif"
+  [ A.style "font-family" "Georgia, serif"
   , A.style "font-size" "1.2em"
   , A.style "font-weight" "700"
   , A.style "text-align" "center"
   , A.style "display" "inline-block"
   , A.style "width" "28px"
   , A.style "height" "28px"
-  , A.style "border" "2px solid black"
+  , A.style "border" "3px solid black"
+  , A.style "padding" "0px 0px 4px"
+  , A.id "LiveEdit-information"
   , A.alt "Enter a YouTube link or ID and press the \"Fetch\" button. Then click on any word in the transcript box to get transported to the point in the video where that word is said. Watching the video will do the same in reverse. You can edit the text by double-clicking any word as well."
-  ]) [text " i "]
+  ]) [text "i"]
 url_field : String -> Html Msg
 url_field id = input (
   [ A.placeholder "Please provide a YouTube link/ID."
