@@ -30,6 +30,9 @@ function startElm(){
       pauseVideo(); }
   });
   console.log("Subscribed to port!");
+/*  setTimeout(addGlobalStyle, 0)
+}
+function addGlobalStyle(){*/
   let style = document.createElement('style');
   style.innerHTML = "[alt]{position:relative;display:inline-flex;justify-content:center;}[alt]:focus::after{content:attr(alt);position:absolute;top:125%;left:95%;color:#fff;background-color:#333;width:200%;padding:10px;font-size:0.9em;}";
   let ref = document.querySelector('script');
