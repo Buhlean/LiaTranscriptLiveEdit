@@ -8397,15 +8397,16 @@ var $author$project$Main$tooltip_button = A2(
 				A2($elm$html$Html$Attributes$style, 'font-family', 'Lucida Bright, Georgia, serif'),
 				A2($elm$html$Html$Attributes$style, 'font-size', '1.2em'),
 				A2($elm$html$Html$Attributes$style, 'font-weight', '700'),
+				A2($elm$html$Html$Attributes$style, 'text-align', 'center'),
 				A2($elm$html$Html$Attributes$style, 'display', 'inline-block'),
-				A2($elm$html$Html$Attributes$style, 'width', '30px'),
-				A2($elm$html$Html$Attributes$style, 'height', '30px'),
-				A2($elm$html$Html$Attributes$style, 'border', '3px solid black'),
+				A2($elm$html$Html$Attributes$style, 'width', '28px'),
+				A2($elm$html$Html$Attributes$style, 'height', '28px'),
+				A2($elm$html$Html$Attributes$style, 'border', '2px solid black'),
 				$elm$html$Html$Attributes$alt('Enter a YouTube link or ID and press the \"Fetch\" button. Then click on any word in the transcript box to get transported to the point in the video where that word is said. Watching the video will do the same in reverse. You can edit the text by double-clicking any word as well.')
 			])),
 	_List_fromArray(
 		[
-			$elm$html$Html$text('i')
+			$elm$html$Html$text(' i ')
 		]));
 var $author$project$Main$ID_Changed = function (a) {
 	return {$: 0, a: a};
