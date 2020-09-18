@@ -5,6 +5,7 @@ import Html.Attributes as A
 import Html.Events exposing (onClick, onInput, onDoubleClick)
 import Http
 import XmlParser exposing (Node(..))
+import String.Mark as Mark
 
 main 
   = Browser.element
@@ -23,6 +24,7 @@ type alias Cue =
 type alias Model = 
   { input_field : String
   , current_position : Float
+  , search_term : String
   , state : State
   }
 
@@ -46,6 +48,7 @@ type Msg
   | Player_Time_At Float
   | JumpTo Float
   | Summon_Editor Int
+  | Search_Changed String
 
 port send_to_yt_API       : String -> Cmd msg
 port receive_msg_from_API : (Float -> msg) -> Sub msg
@@ -54,6 +57,7 @@ init : () -> (Model, Cmd Msg)
 init _ = (
   { input_field = "I7jf_U89ddk"
   , current_position = 0.0
+  , search_term = ""
   , state = (Fresh)
   },
   Cmd.none)
@@ -88,6 +92,10 @@ update msg model =
       case model.state of
         Received _ _ _              -> ({model | current_position = second }            ,Cmd.none)
         _ -> doNothing model
+    Search_Changed new ->
+      case model.state of 
+        Received _ _ _              -> ({model | search_term = new }                    ,Cmd.none)
+        _ -> doNothing model
     Validate_And_Fetch ->
       case model.state of
         Loading_Cues id -> doNothing model
@@ -115,12 +123,11 @@ view model =
     Loading_YT   video_id -> (lazy (unloaded_elements model.input_field) "Loading...")
     Loading_Cues video_id -> (lazy (unloaded_elements model.input_field) "Loading...")
     Received cues video_id edit -> 
-      div 
-        [ A.style "width" "100%" ] 
-        [ lazy (unloaded_elements model.input_field) ("Loaded: "++ video_id)
-        , lazy (div 
-          ([ A.id "cues-container" ] ++ common_style_text ++ common_style_container ) )
-          (List.indexedMap (generate_html_from_cue model.current_position edit) cues)
+      div [ A.style "width" "100%" ] 
+        [ tooltip_button
+        , lazy search_field model.search_term
+        , lazy (div ([ A.id "cues-container" ] ++ common_style_text ++ common_style_container ) ) (List.indexedMap (generate_html_from_cue model.current_position edit model.search_term) cues)
+        , lazy (unloaded_elements model.input_field) <| "Loaded "++video_id
         ]
 subscriptions : Model -> Sub Msg
 subscriptions _ = receive_msg_from_API loaded_or_position
@@ -152,7 +159,7 @@ butcher_URL url cut1 cut2 error =
           id::xs -> Ok id
           _ -> Err error
       _ -> Err error
-      
+
 update_if : String -> Int -> Int -> Cue -> Cue -- to be used with indexedMap
 update_if new_content only_this_one_gets_changed current_index current_cue = 
   if current_index == only_this_one_gets_changed then { current_cue | content = new_content }
@@ -192,25 +199,29 @@ common_style_text =
 common_style_container : (List (Html.Attribute Msg))
 common_style_container =
   [ A.style "overflow-y" "auto"
-  , A.style "height" "40vh"
+  , A.style "height" "50vh"
   , A.style "margin" "2px"
   , A.style "border" "1px solid black"
   , A.style "padding" "4px 4px 4px 12px"
   ]
+  
 tooltip_button : Html Msg
 tooltip_button = a (common_style_top++
   [ A.style "font-family" "Georgia, serif"
-  , A.style "font-size" "1.2em"
-  , A.style "font-weight" "700"
+  , A.style "font-size" "1.35em"
+  , A.style "font-weight" "900"
   , A.style "text-align" "center"
   , A.style "display" "inline-block"
-  , A.style "width" "28px"
-  , A.style "height" "28px"
+  , A.style "width" "29px"
+  , A.style "height" "29px"
   , A.style "border" "3px solid black"
-  , A.style "padding" "0px 0px 4px"
+  , A.style "padding" "0px 0px 2px"
+  , A.style "box-sizing" "border-box"
   , A.id "LiveEdit-information"
-  , A.alt "Enter a YouTube link or ID and press the \"Fetch\" button. Then click on any word in the transcript box to get transported to the point in the video where that word is said. Watching the video will do the same in reverse. You can edit the text by double-clicking any word as well."
+  , A.tabindex -1
+  , A.title "Enter a YouTube link or ID and press the \"Fetch\" button. Then click on any word in the transcript box to get transported to the point in the video where that word is said. Watching the video will do the same in reverse. You can edit the text by double-clicking any word as well."
   ]) [text "i"]
+  
 url_field : String -> Html Msg
 url_field id = input (
   [ A.placeholder "Please provide a YouTube link/ID."
@@ -218,35 +229,46 @@ url_field id = input (
   , onInput ID_Changed
   , A.id "input-video-url-or-id"
   , A.style "min-width" "27ch"
+  , A.title "Please provide a YouTube URL or just the ID"
   ]++common_style_top) []
 
 fetch_button : Html Msg
 fetch_button = button (
   [ onClick Validate_And_Fetch
   , A.id "button-fetches-transcript-by-id"
-
-  ]++common_style_top) [ text "Fetch transcript" ]
+  , A.title "Fetch the video and its transcript"
+  ]++common_style_top) [ text "Fetch" ]
 
 status_message : String -> Html Msg
 status_message message = span 
   ([]++common_style_top ) [text message]
+  
+search_field : String -> Html Msg
+search_field search_term = input (
+  [ A.placeholder "Search"
+  , A.value search_term
+  , onInput Search_Changed
+  , A.id "input-search-within-text"
+  , A.style "min-width" "10ch"
+  , A.style "width" "auto"
+  ]++common_style_top) []
 
-generate_html_from_cue : Float -> Editing -> Int -> Cue -> Html Msg 
-generate_html_from_cue time_sec whether_editing index cue = 
+generate_html_from_cue : Float -> Editing -> String -> Int -> Cue -> Html Msg 
+generate_html_from_cue time_sec whether_editing search_for index cue = 
   case whether_editing of
-    No         ->                         (create_cue_span index cue (cue.start <= time_sec && time_sec < cue.start+cue.duration))
+    No         ->                         (create_cue_span index cue (cue.start <= time_sec && time_sec < cue.start+cue.duration) search_for)
     Yes number -> if index == number then (create_editable_cue index cue)
-                                     else (create_cue_span index cue False)
+                                     else (create_cue_span index cue False search_for)
 
-create_cue_span : Int -> Cue -> Bool -> Html Msg
-create_cue_span index cue highlight = 
+create_cue_span : Int -> Cue -> Bool -> String -> Html Msg
+create_cue_span index cue highlight search_for = 
   span 
     [ onClick (JumpTo cue.start)
     , onDoubleClick (Summon_Editor index)
     , A.id ("cue-"++ (String.fromInt index))
     , A.class "cue"
     , (A.style "background-color" ((\h -> if h then "#8CF" else "#FFF") highlight))
-    ] [ text cue.content ]
+    ] <| Mark.mark search_for cue.content
     
 create_editable_cue : Int -> Cue -> Html Msg
 create_editable_cue index cue =
