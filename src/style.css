@@ -1,0 +1,68 @@
+.TLE-everything {
+  width: 100%;
+}
+.TLE-flex-row{
+  width: 100%;
+  font-family: Helvetica;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: flex-start;
+}
+#TLE-tooltip{
+  font-family: Georgia, serif;
+  font-size: 1.35em;
+  font-weight: 900;
+  text-align: center;
+  display: inline-block;
+  width: 29px;
+  height: 29px;
+  border: 3px solid black;
+  padding: 0px 0px 2px;
+  box-sizing: border-box;
+}
+.TLE-container{
+  overflow-y: auto;
+  height: 50vh;
+  margin: 2px;
+  border: 1px solid black;
+  padding: 4px 4px 4px 12px;
+}
+.TLE-text{
+  font-size: 1.06em;
+  color: #000;
+  line-height: 1.4;
+}
+.TLE-top-elements{
+  margin: 2px;
+  font-size: 1.06em;
+  padding: 2px 2px 2px 2px;
+}
+#input-video-url-or-id{
+  min-width: 27ch;
+}
+#input-search-within-text{
+  min-width: 10ch;
+  width: auto;
+}
+.TLE-stats-count {
+  display: inline-block;
+  width: 40px;
+}
+/*
+[alt]{
+  position:relative;
+  display:inline-flex;
+  justify-content:center;
+}
+[alt]:focus::after{
+  content:attr(alt);
+  position:absolute;
+  top:125%;
+  left:95%;
+  color:#fff;
+  background-color:#333;
+  width:200%;
+  padding:10px;
+  font-size:0.9em;
+}*/
