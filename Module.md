@@ -7,7 +7,7 @@ comment: Both an embedded youtube player and a transcript download and edit tool
 
 script: https://cdn.jsdelivr.net/gh/Buhlean/LiaTranscriptLiveEdit/src/Module.min.js
 script: https://cdn.jsdelivr.net/gh/Buhlean/LiaTranscriptLiveEdit/src/ElmModule.min.js
-import: https://cdn.jsdelivr.net/gh/Buhlean/LiaTranscriptLiveEdit/src/style.min.css
+import: https://cdn.jsdelivr.net/gh/Buhlean/LiaTranscriptLiveEdit/src/style.css
 
 
 @RunTranscriptLE
