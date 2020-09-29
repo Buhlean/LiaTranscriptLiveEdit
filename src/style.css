@@ -49,6 +49,9 @@
   display: inline-block;
   width: 40px;
 }
+iframe {
+    overflow: scroll;
+}
 /*
 [alt]{
   position:relative;

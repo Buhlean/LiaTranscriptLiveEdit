@@ -784,11 +784,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.t.L === region.ah.L)
+	if (region.u.M === region.ah.M)
 	{
-		return 'on line ' + region.t.L;
+		return 'on line ' + region.u.M;
 	}
-	return 'on lines ' + region.t.L + ' through ' + region.ah.L;
+	return 'on lines ' + region.u.M + ' through ' + region.ah.M;
 }
 
 
@@ -2704,7 +2704,7 @@ var _VirtualDom_mapEventTuple = F2(function(func, tuple)
 var _VirtualDom_mapEventRecord = F2(function(func, record)
 {
 	return {
-		w: func(record.w),
+		y: func(record.y),
 		Z: record.Z,
 		W: record.W
 	}
@@ -2974,7 +2974,7 @@ function _VirtualDom_makeCallback(eventNode, initialHandler)
 		// 3 = Custom
 
 		var value = result.a;
-		var message = !tag ? value : tag < 3 ? value.a : value.w;
+		var message = !tag ? value : tag < 3 ? value.a : value.y;
 		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.Z;
 		var currentEventNode = (
 			stopPropagation && event.stopPropagation(),
@@ -5621,26 +5621,22 @@ var $elm$core$Task$perform = F2(
 			A2($elm$core$Task$map, toMessage, task));
 	});
 var $elm$browser$Browser$element = _Browser_element;
-var $author$project$Main$ASCENDING = 0;
+var $author$project$Main$DESCENDING = 1;
 var $author$project$Main$Fresh = {$: 0};
-var $author$project$Main$Group_Size = function (a) {
-	return {$: 0, a: a};
-};
+var $author$project$Main$Merged = {$: 1};
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
 		{
-			r: _List_Nil,
-			v: '',
-			F: 0.0,
+			o: _List_Nil,
+			x: '',
+			B: 0.0,
 			j: 'I7jf_U89ddk',
-			V: _Utils_Tuple2(
-				$author$project$Main$Group_Size(0),
-				0),
-			D: '',
+			H: _Utils_Tuple2($author$project$Main$Merged, 1),
+			t: '',
 			e: $author$project$Main$Fresh,
-			y: _List_Nil
+			v: _List_Nil
 		},
 		$elm$core$Platform$Cmd$none);
 };
@@ -5676,7 +5672,7 @@ var $elm$core$String$concat = function (strings) {
 	return A2($elm$core$String$join, '', strings);
 };
 var $author$project$Main$extract_content = function (cue) {
-	return cue.q;
+	return cue.r;
 };
 var $elm$core$List$filter = F2(
 	function (isGood, list) {
@@ -5948,11 +5944,11 @@ var $author$project$Main$haeufigkeitsanalyse = function (cues) {
 			[1, 2, 3]));
 };
 var $author$project$Main$count_words_once = function (model) {
-	var _v0 = $elm$core$List$head(model.y);
+	var _v0 = $elm$core$List$head(model.v);
 	if (_v0.$ === 1) {
-		return $author$project$Main$haeufigkeitsanalyse(model.r);
+		return $author$project$Main$haeufigkeitsanalyse(model.o);
 	} else {
-		return model.y;
+		return model.v;
 	}
 };
 var $author$project$Main$doNothing = function (model) {
@@ -6769,15 +6765,15 @@ var $author$project$Main$package_and_download = F2(
 		if (!dl) {
 			return A3(
 				$elm$file$File$Download$string,
-				model.v + '_transcript.csv',
+				model.x + '_transcript.csv',
 				'text/csv',
 				'start,duration,content\r\n' + $elm$core$String$concat(
 					A2(
 						$elm$core$List$map,
 						function (_v1) {
-							var start = _v1.t;
-							var duration = _v1.K;
-							var content = _v1.q;
+							var start = _v1.u;
+							var duration = _v1.L;
+							var content = _v1.r;
 							return $elm$core$String$concat(
 								_List_fromArray(
 									[
@@ -6789,11 +6785,11 @@ var $author$project$Main$package_and_download = F2(
 										'\r\n'
 									]));
 						},
-						A2($elm$core$List$drop, 1, model.r))));
+						A2($elm$core$List$drop, 1, model.o))));
 		} else {
 			return A3(
 				$elm$file$File$Download$string,
-				model.v + '_stats.csv',
+				model.x + '_stats.csv',
 				'text/csv',
 				'word,count\r\n' + $elm$core$String$concat(
 					A2(
@@ -6810,7 +6806,7 @@ var $author$project$Main$package_and_download = F2(
 										'\r\n'
 									]));
 						},
-						A3($elm$core$List$foldl, $elm$core$Basics$append, _List_Nil, model.y))));
+						A3($elm$core$List$foldl, $elm$core$Basics$append, _List_Nil, model.v))));
 		}
 	});
 var $elm$core$List$append = F2(
@@ -6821,7 +6817,7 @@ var $elm$core$List$append = F2(
 			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
 		}
 	});
-var $author$project$Main$empty_cue = {q: '>> ', K: 0.0, t: 0.0};
+var $author$project$Main$empty_cue = {r: '>> ', L: 0.0, u: 0.0};
 var $elm$core$String$toFloat = _String_toFloat;
 var $author$project$Main$toFloat_with_default = F2(
 	function (string, def) {
@@ -6842,13 +6838,13 @@ var $author$project$Main$extract_information = function (node) {
 		var _v3 = node.c;
 		var cue_text = _v3.a.a;
 		return {
-			q: A3(
+			r: A3(
 				$elm$core$String$replace,
 				'&#39;',
 				'\'',
 				A3($elm$core$String$replace, '&quot;', '\"', cue_text)) + ' ',
-			K: A2($author$project$Main$toFloat_with_default, duration_attr.aU, 0.0),
-			t: A2($author$project$Main$toFloat_with_default, start_attr.aU, 0.0)
+			L: A2($author$project$Main$toFloat_with_default, duration_attr.aU, 0.0),
+			u: A2($author$project$Main$toFloat_with_default, start_attr.aU, 0.0)
 		};
 	} else {
 		return $author$project$Main$empty_cue;
@@ -8542,7 +8538,7 @@ var $author$project$Main$update_if = F4(
 	function (new_content, only_this_one_gets_changed, current_index, current_cue) {
 		return _Utils_eq(current_index, only_this_one_gets_changed) ? _Utils_update(
 			current_cue,
-			{q: new_content}) : current_cue;
+			{r: new_content}) : current_cue;
 	});
 var $author$project$Main$BadInput = 0;
 var $author$project$Main$EmptyString = 2;
@@ -8579,7 +8575,7 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{e: $author$project$Main$Loading_Cues}),
-						$author$project$Main$fetch_transcript(model.v));
+						$author$project$Main$fetch_transcript(model.x));
 				} else {
 					return $author$project$Main$doNothing(model);
 				}
@@ -8602,7 +8598,7 @@ var $author$project$Main$update = F2(
 								_Utils_update(
 									model,
 									{
-										r: cues,
+										o: cues,
 										e: $author$project$Main$Received($author$project$Main$No)
 									}),
 								$elm$core$Platform$Cmd$none);
@@ -8642,7 +8638,7 @@ var $author$project$Main$update = F2(
 							_Utils_update(
 								model,
 								{
-									F: position,
+									B: position,
 									e: $author$project$Main$Received($author$project$Main$No)
 								}),
 							$elm$core$Platform$Cmd$none);
@@ -8651,7 +8647,7 @@ var $author$project$Main$update = F2(
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
-								{F: position}),
+								{B: position}),
 							$author$project$Main$send_to_yt_API(
 								$elm$core$String$concat(
 									_List_fromArray(
@@ -8666,26 +8662,40 @@ var $author$project$Main$update = F2(
 			case 5:
 				var second = msg.a;
 				var _v8 = model.e;
-				if (_v8.$ === 6) {
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{F: second}),
-						$elm$core$Platform$Cmd$none);
-				} else {
-					return $author$project$Main$doNothing(model);
+				switch (_v8.$) {
+					case 6:
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{B: second}),
+							$elm$core$Platform$Cmd$none);
+					case 7:
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{B: second}),
+							$elm$core$Platform$Cmd$none);
+					default:
+						return $author$project$Main$doNothing(model);
 				}
 			case 8:
 				var _new = msg.a;
 				var _v9 = model.e;
-				if (_v9.$ === 6) {
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{D: _new}),
-						$elm$core$Platform$Cmd$none);
-				} else {
-					return $author$project$Main$doNothing(model);
+				switch (_v9.$) {
+					case 6:
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{t: _new}),
+							$elm$core$Platform$Cmd$none);
+					case 7:
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{t: _new}),
+							$elm$core$Platform$Cmd$none);
+					default:
+						return $author$project$Main$doNothing(model);
 				}
 			case 9:
 				var _v10 = model.e;
@@ -8695,7 +8705,7 @@ var $author$project$Main$update = F2(
 							model,
 							{
 								e: $author$project$Main$Stats(0),
-								y: $author$project$Main$count_words_once(model)
+								v: $author$project$Main$count_words_once(model)
 							}),
 						$elm$core$Platform$Cmd$none);
 				} else {
@@ -8714,13 +8724,25 @@ var $author$project$Main$update = F2(
 				} else {
 					return $author$project$Main$doNothing(model);
 				}
+			case 13:
+				var info = msg.a;
+				var _v12 = model.e;
+				if (_v12.$ === 7) {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{H: info}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return $author$project$Main$doNothing(model);
+				}
 			case 11:
 				var which = msg.a;
 				if (which === 1) {
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{D: ''}),
+							{t: ''}),
 						$elm$core$Platform$Cmd$none);
 				} else {
 					return _Utils_Tuple2(
@@ -8735,20 +8757,20 @@ var $author$project$Main$update = F2(
 					model,
 					A2($author$project$Main$package_and_download, dl, model));
 			case 2:
-				var _v13 = model.e;
-				switch (_v13.$) {
+				var _v14 = model.e;
+				switch (_v14.$) {
 					case 5:
 						return $author$project$Main$doNothing(model);
 					case 4:
 						return $author$project$Main$doNothing(model);
 					default:
-						var _v14 = $author$project$Main$validate_id(model.j);
-						if (!_v14.$) {
-							var video_id = _v14.a;
+						var _v15 = $author$project$Main$validate_id(model.j);
+						if (!_v15.$) {
+							var video_id = _v15.a;
 							return _Utils_Tuple2(
 								_Utils_update(
 									model,
-									{v: video_id, e: $author$project$Main$Loading_YT}),
+									{o: _List_Nil, x: video_id, t: '', e: $author$project$Main$Loading_YT, v: _List_Nil}),
 								$author$project$Main$send_to_yt_API('ID:' + video_id));
 						} else {
 							return _Utils_Tuple2(
@@ -8761,17 +8783,17 @@ var $author$project$Main$update = F2(
 			case 1:
 				var who = msg.a;
 				var _new = msg.b;
-				var _v15 = model.e;
-				if ((_v15.$ === 6) && (_v15.a.$ === 1)) {
+				var _v16 = model.e;
+				if ((_v16.$ === 6) && (_v16.a.$ === 1)) {
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{
-								r: A2(
+								o: A2(
 									$elm$core$List$indexedMap,
 									A2($author$project$Main$update_if, _new, who),
-									model.r),
-								y: $author$project$Main$haeufigkeitsanalyse(model.r)
+									model.o),
+								v: $author$project$Main$haeufigkeitsanalyse(model.o)
 							}),
 						$elm$core$Platform$Cmd$none);
 				} else {
@@ -8779,9 +8801,9 @@ var $author$project$Main$update = F2(
 				}
 			default:
 				var _new = msg.a;
-				var _v16 = model.e;
-				if ((_v16.$ === 6) && (_v16.a.$ === 1)) {
-					var who = _v16.a.a;
+				var _v17 = model.e;
+				if ((_v17.$ === 6) && (_v17.a.$ === 1)) {
+					var who = _v17.a.a;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
@@ -9023,7 +9045,7 @@ var $ChristophP$elm_mark$String$Mark$SearchNormal = function (a) {
 var $ChristophP$elm_mark$String$Mark$SingleWord = 0;
 var $elm$html$Html$mark = _VirtualDom_node('mark');
 var $ChristophP$elm_mark$String$Mark$defaultOptions = {
-	Q: function (hit) {
+	R: function (hit) {
 		return A2(
 			$elm$html$Html$mark,
 			_List_Nil,
@@ -9032,8 +9054,8 @@ var $ChristophP$elm_mark$String$Mark$defaultOptions = {
 					$elm$html$Html$text(hit)
 				]));
 	},
-	R: $elm$html$Html$text,
-	T: 3,
+	S: $elm$html$Html$text,
+	U: 3,
 	X: $ChristophP$elm_mark$String$Mark$SearchNormal(1),
 	_: 0
 };
@@ -9056,8 +9078,8 @@ var $ChristophP$elm_mark$String$Mark$markWithHelp = F5(
 	function (options, revPositions, term, content, markers) {
 		markWithHelp:
 		while (true) {
-			var mapHit = options.Q;
-			var mapMiss = options.R;
+			var mapHit = options.R;
+			var mapMiss = options.S;
 			if (!revPositions.b) {
 				return A3($ChristophP$elm_mark$String$Mark$wrapAndAddToMarkers, content, mapMiss, markers);
 			} else {
@@ -9196,7 +9218,7 @@ var $ChristophP$elm_mark$Internal$stringIndexesIgnoreCase = F2(
 var $ChristophP$elm_mark$String$Mark$pickGetIndexesFn = function (_v0) {
 	var searchType = _v0.X;
 	var whitespace = _v0._;
-	var minTermLength = _v0.T;
+	var minTermLength = _v0.U;
 	var getIndexes = A2(
 		$ChristophP$elm_mark$Internal$applyMinLengthCheck,
 		minTermLength,
@@ -9241,25 +9263,25 @@ var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $author$project$Main$create_cue_span = F4(
 	function (index, cue, highlight, search_for) {
+		var maybe_colour = highlight ? _List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'background-color', '#8CF')
+			]) : _List_Nil;
 		return A2(
 			$elm$html$Html$span,
-			_List_fromArray(
-				[
-					$elm$html$Html$Events$onClick(
-					$author$project$Main$JumpTo(cue.t)),
-					$elm$html$Html$Events$onDoubleClick(
-					$author$project$Main$Summon_Editor(index)),
-					$elm$html$Html$Attributes$id(
-					'cue-' + $elm$core$String$fromInt(index)),
-					$elm$html$Html$Attributes$class('cue'),
-					A2(
-					$elm$html$Html$Attributes$style,
-					'background-color',
-					function (h) {
-						return h ? '#8CF' : '#FFF';
-					}(highlight))
-				]),
-			A2($ChristophP$elm_mark$String$Mark$mark, search_for, cue.q));
+			_Utils_ap(
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick(
+						$author$project$Main$JumpTo(cue.u)),
+						$elm$html$Html$Events$onDoubleClick(
+						$author$project$Main$Summon_Editor(index)),
+						$elm$html$Html$Attributes$id(
+						'cue-' + $elm$core$String$fromInt(index)),
+						$elm$html$Html$Attributes$class('cue')
+					]),
+				maybe_colour),
+			A2($ChristophP$elm_mark$String$Mark$mark, search_for, cue.r));
 	});
 var $author$project$Main$Cue_Changed = F2(
 	function (a, b) {
@@ -9326,19 +9348,19 @@ var $author$project$Main$create_editable_cue = F2(
 					$elm$html$Html$Events$onInput(
 					$author$project$Main$Cue_Changed(index)),
 					$elm$html$Html$Events$onDoubleClick(
-					$author$project$Main$JumpTo(cue.t)),
+					$author$project$Main$JumpTo(cue.u)),
 					$elm_community$html_extra$Html$Events$Extra$onEnter(
-					$author$project$Main$JumpTo(cue.t)),
+					$author$project$Main$JumpTo(cue.u)),
 					$elm$html$Html$Attributes$id(
 					'cue-input-' + $elm$core$String$fromInt(index)),
 					$elm$html$Html$Attributes$class('cue-input'),
-					$elm$html$Html$Attributes$value(cue.q),
+					$elm$html$Html$Attributes$value(cue.r),
 					A2(
 					$elm$html$Html$Attributes$style,
 					'min-width',
 					$elm$core$String$fromInt(
 						$elm$core$Basics$round(
-							$elm$core$String$length(cue.q) * 0.8)) + 'ch'),
+							$elm$core$String$length(cue.r) * 0.8)) + 'ch'),
 					$elm$html$Html$Attributes$class('TLE-text')
 				]),
 			_List_Nil);
@@ -9350,7 +9372,7 @@ var $author$project$Main$generate_html_from_cue = F5(
 				$author$project$Main$create_cue_span,
 				index,
 				cue,
-				(_Utils_cmp(cue.t, time_sec) < 1) && (_Utils_cmp(time_sec, cue.t + cue.K) < 0),
+				(_Utils_cmp(cue.u, time_sec) < 1) && (_Utils_cmp(time_sec, cue.u + cue.L) < 0),
 				search_for);
 		} else {
 			var number = whether_editing.a;
@@ -9375,6 +9397,77 @@ var $author$project$Main$search_field = function (search_term) {
 				$elm$html$Html$Attributes$class('TLE-top-elements')
 			]),
 		_List_Nil);
+};
+var $author$project$Main$ASCENDING = 0;
+var $author$project$Main$Reorder_Stats = function (a) {
+	return {$: 13, a: a};
+};
+var $author$project$Main$stat_order_button = function (_v0) {
+	var how = _v0.a;
+	var ord = _v0.b;
+	var msg = function () {
+		if (!ord) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}();
+	return A2(
+		$elm$html$Html$button,
+		_List_fromArray(
+			[
+				$elm$html$Html$Events$onClick(
+				$author$project$Main$Reorder_Stats(
+					_Utils_Tuple2(how, msg))),
+				$elm$html$Html$Attributes$id('button-change-stats-order'),
+				$elm$html$Html$Attributes$title('Switch between Ascending and Descending order'),
+				$elm$html$Html$Attributes$class('TLE-top-elements')
+			]),
+		_List_fromArray(
+			[
+				$elm$html$Html$text('\u21C5')
+			]));
+};
+var $author$project$Main$Group_Size = function (a) {
+	return {$: 0, a: a};
+};
+var $author$project$Main$stat_view_button = function (_v0) {
+	var how = _v0.a;
+	var ord = _v0.b;
+	var _v1 = function () {
+		if (how.$ === 1) {
+			return _Utils_Tuple2(
+				'Mixed',
+				$author$project$Main$Group_Size(0));
+		} else {
+			if (!how.a) {
+				var _v3 = how.a;
+				return _Utils_Tuple2(
+					'Grouped \u2191',
+					$author$project$Main$Group_Size(1));
+			} else {
+				var _v4 = how.a;
+				return _Utils_Tuple2('Grouped \u2193', $author$project$Main$Merged);
+			}
+		}
+	}();
+	var label = _v1.a;
+	var msg = _v1.b;
+	return A2(
+		$elm$html$Html$button,
+		_List_fromArray(
+			[
+				$elm$html$Html$Events$onClick(
+				$author$project$Main$Reorder_Stats(
+					_Utils_Tuple2(msg, ord))),
+				$elm$html$Html$Attributes$id('button-switches-to-cues-view'),
+				$elm$html$Html$Attributes$title('Switch between: ordered by word count or all in one list'),
+				$elm$html$Html$Attributes$class('TLE-top-elements')
+			]),
+		_List_fromArray(
+			[
+				$elm$html$Html$text(label)
+			]));
 };
 var $author$project$Main$View_Stats = {$: 9};
 var $author$project$Main$stats_button = A2(
@@ -9524,7 +9617,7 @@ var $author$project$Main$view = function (model) {
 								])),
 						_List_fromArray(
 							[
-								$author$project$Main$search_field(model.D),
+								$author$project$Main$search_field(model.t),
 								A3($author$project$Main$delete_content, 1, 'search', 'Clears the search term'),
 								A3($author$project$Main$download_data, 0, 'download-transcript', 'Download the transcript as-is'),
 								$author$project$Main$stats_button
@@ -9540,12 +9633,12 @@ var $author$project$Main$view = function (model) {
 								])),
 						A2(
 							$elm$core$List$indexedMap,
-							A3($author$project$Main$generate_html_from_cue, model.F, edit, model.D),
-							model.r)),
+							A3($author$project$Main$generate_html_from_cue, model.B, edit, model.t),
+							model.o)),
 						A2(
 						$elm$html$Html$Lazy$lazy,
 						$author$project$Main$unloaded_elements(model.j),
-						'Loaded ' + model.v)
+						'Loaded ' + model.x)
 					]));
 		default:
 			var which = _v0.a;
@@ -9566,10 +9659,12 @@ var $author$project$Main$view = function (model) {
 								])),
 						_List_fromArray(
 							[
-								$author$project$Main$search_field(model.D),
+								$author$project$Main$search_field(model.t),
 								A3($author$project$Main$delete_content, 1, 'search', 'Clears the search term'),
 								A3($author$project$Main$download_data, 1, 'download-statistics', 'Download the counted word data'),
-								$author$project$Main$cue_button
+								$author$project$Main$cue_button,
+								$author$project$Main$stat_view_button(model.H),
+								$author$project$Main$stat_order_button(model.H)
 							])),
 						A2(
 						$elm$html$Html$Lazy$lazy,
@@ -9582,15 +9677,15 @@ var $author$project$Main$view = function (model) {
 								])),
 						A2(
 							$author$project$Main$display_stats,
-							model.V,
+							model.H,
 							A2(
 								$elm$core$List$map,
 								$elm$core$List$sortBy($elm$core$Tuple$second),
-								model.y))),
+								model.v))),
 						A2(
 						$elm$html$Html$Lazy$lazy,
 						$author$project$Main$unloaded_elements(model.j),
-						'Loaded ' + model.v)
+						'Loaded ' + model.x)
 					]));
 	}
 };

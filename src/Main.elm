@@ -65,6 +65,7 @@ type Msg
   | View_Cues
   | Clear_Field Field
   | Download_Data Download
+  | Reorder_Stats (Stat_View, Order)
 
 port send_to_yt_API       : String -> Cmd msg
 port receive_msg_from_API : (Float -> msg) -> Sub msg
@@ -77,8 +78,8 @@ init _ = (
   , search_term = ""
   , cues = []
   , stats = []
-  , preferred_stats = (Group_Size ASCENDING, ASCENDING)
-  , state = (Fresh)
+  , preferred_stats = (Merged, DESCENDING)
+  , state = Fresh
   },
   Cmd.none)
 
@@ -111,10 +112,12 @@ update msg model =
     Player_Time_At second ->
       case model.state of
         Received _         -> ({model | current_position = second }       ,Cmd.none)
+        Stats _            -> ({model | current_position = second }       ,Cmd.none)
         _ -> doNothing model
     Search_Changed new ->
       case model.state of 
         Received _         -> ({model | search_term = new }               ,Cmd.none)
+        Stats _            -> ({model | search_term = new }               ,Cmd.none)
         _ -> doNothing model
     View_Stats ->
       case model.state of
@@ -123,6 +126,10 @@ update msg model =
     View_Cues ->
       case model.state of
         Stats _            -> ({model | state = Received No }             ,Cmd.none)
+        _ -> doNothing model
+    Reorder_Stats info ->
+      case model.state of
+        Stats _            -> ({model | preferred_stats = info }          ,Cmd.none)
         _ -> doNothing model
     Clear_Field which ->
       case which of 
@@ -135,7 +142,7 @@ update msg model =
         Loading_YT   -> doNothing model
         _ -> 
           case validate_id model.input_field of
-            Ok video_id    -> ({model | state = Loading_YT, current_id = video_id } ,send_to_yt_API <| ("ID:"++video_id))
+            Ok video_id    -> ({model | state = Loading_YT, current_id = video_id, search_term = "", cues = [], stats = [] } ,send_to_yt_API <| ("ID:"++video_id))
             Err _          -> ({model | state = ID_Invalid }              ,Cmd.none) 
     Cue_Changed who new ->
       case model.state of
@@ -163,7 +170,7 @@ view model =
         ]
     Stats which   -> 
       div [ A.class "TLE-everything" ] 
-        [ lazy (div [A.class "TLE-flex-row"]) [search_field model.search_term, delete_content F_Search "search" "Clears the search term", download_data Word_Counts "download-statistics" "Download the counted word data", cue_button]
+        [ lazy (div [A.class "TLE-flex-row"]) [search_field model.search_term, delete_content F_Search "search" "Clears the search term", download_data Word_Counts "download-statistics" "Download the counted word data", cue_button, stat_view_button model.preferred_stats, stat_order_button model.preferred_stats]
         , lazy (div ([ A.id "stats-container", A.class "TLE-text", A.class "TLE-container"] )) (display_stats model.preferred_stats <| List.map (List.sortBy Tuple.second) (model.stats))
         , lazy (unloaded_elements model.input_field) <| "Loaded "++model.current_id
         ]
@@ -255,6 +262,36 @@ search_field search_term = input
   , A.id "input-search-within-text"
   , A.class "TLE-top-elements"
   ] []
+  
+stat_view_button : (Stat_View, Order) -> Html Msg
+stat_view_button   (how, ord) = 
+  let 
+    (label, msg) = 
+      case how of
+        Merged -> ("Mixed", Group_Size ASCENDING)
+        Group_Size ASCENDING  -> ("Grouped \u{2191}", Group_Size DESCENDING)
+        Group_Size DESCENDING -> ("Grouped \u{2193}", Merged)
+  in button 
+  [ onClick (Reorder_Stats (msg, ord))
+  , A.id "button-switches-to-cues-view"
+  , A.title "Switch between: ordered by word count or all in one list"
+  , A.class "TLE-top-elements"
+  ] [ text label ]
+  
+stat_order_button : (Stat_View, Order) -> Html Msg
+stat_order_button   (how, ord) = 
+  let 
+    msg =
+      case ord of
+        ASCENDING  -> DESCENDING
+        DESCENDING -> ASCENDING
+  in button 
+  [ onClick (Reorder_Stats (how, msg))
+  , A.id "button-change-stats-order"
+  , A.title "Switch between Ascending and Descending order"
+  , A.class "TLE-top-elements"
+  ] [ text "\u{21C5}" ]
+  
 
 package_and_download : Download -> Model -> Cmd Msg
 package_and_download dl model =
@@ -271,13 +308,15 @@ generate_html_from_cue time_sec whether_editing search_for index cue =
 
 create_cue_span : Int -> Cue -> Bool -> String -> Html Msg
 create_cue_span index cue highlight search_for = 
-  span 
+  let maybe_colour = 
+        if highlight then [A.style "background-color" "#8CF"] else []
+  in span (
     [ onClick (JumpTo cue.start)
     , onDoubleClick (Summon_Editor index)
     , A.id ("cue-"++ (String.fromInt index))
     , A.class "cue"
-    , (A.style "background-color" ((\h -> if h then "#8CF" else "#FFF") highlight))
-    ] <| Mark.mark search_for cue.content
+    ]++maybe_colour)
+    ( Mark.mark search_for cue.content )
     
 create_editable_cue : Int -> Cue -> Html Msg
 create_editable_cue index cue =
@@ -291,8 +330,6 @@ create_editable_cue index cue =
     , A.style "min-width" (String.fromInt (round((toFloat(String.length cue.content))*0.8))++"ch")
     , A.class "TLE-text"
     ]) []
-
-
 
 ------------------------------------------------------------------------------------------
 ---------------------------------------- HELPERS  ----------------------------------------
