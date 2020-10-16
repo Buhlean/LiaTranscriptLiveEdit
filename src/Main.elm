@@ -5,6 +5,8 @@ import Html.Attributes as A
 import Html.Events exposing (onClick, onInput, onDoubleClick)
 import Html.Events.Extra exposing (onEnter)
 import Http
+import Json.Decode as JD
+import Json.Encode as JE
 import XmlParser exposing (Node(..))
 import String.Mark as Mark
 import File.Download as Download
@@ -14,7 +16,7 @@ import Debug
 main 
   = Browser.element
   { init = init
-  , update = update
+  , update = update_with_storage
   , subscriptions = subscriptions
   , view = view
   }
@@ -36,11 +38,11 @@ type alias Model =
   , state : State
   }
 
-type State = Fresh | XML_Invalid | ID_Invalid | Load_Failed | Loading_YT | Loading_Cues | Received Editing | Stats Category
+type State = Fresh | XML_Invalid | ID_Invalid | Load_Failed | Loading_YT | Loading_Cues | Received Editing | Stats | Reloading_YT
 
 type Editing = No | Yes Int
-type Category = Word_Length | Word_Count 
 type Field = F_LinkID | F_Search
+type alias Preferences = (Stat_View, Order)
 type Stat_View = Group_Size Order | Merged 
 type Order = ASCENDING | DESCENDING
 type Download = Transcript | Word_Counts
@@ -70,8 +72,10 @@ type Msg
 port send_to_yt_API       : String -> Cmd msg
 port receive_msg_from_API : (Float -> msg) -> Sub msg
 
-init : () -> (Model, Cmd Msg)
-init _ = (
+port setStorage           : String -> Cmd msg -- String means JSON String here
+
+empty_model : Model
+empty_model = 
   { input_field = "I7jf_U89ddk"
   , current_id = ""
   , current_position = 0.0
@@ -80,15 +84,38 @@ init _ = (
   , stats = []
   , preferred_stats = (Merged, DESCENDING)
   , state = Fresh
-  },
-  Cmd.none)
+  }
+
+init : String -> ( Model, Cmd Msg ) -- meaning "JSON String" -> ...
+init maybe_model =
+  let 
+    determine_if_player_needs_reloading : Model -> ( Model, Cmd Msg )
+    determine_if_player_needs_reloading model =
+      case model.state of
+        Received _ -> (model, send_to_yt_API <| ("ID:"++model.current_id))
+        _          -> (model, Cmd.none)
+  in
+    case JD.decodeString decode_model (Debug.log "stored_data:" maybe_model) of
+      Ok  v -> determine_if_player_needs_reloading v
+      Err e -> (empty_model, Cmd.none)
+
+update_with_storage : Msg -> Model -> ( Model, Cmd Msg )
+update_with_storage msg model =
+  let
+    ( newModel, cmds ) =
+      update msg model
+  in
+    ( newModel
+    , Cmd.batch [ setStorage (JE.encode 0 (encode_model newModel)), cmds ]
+    )
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     Player_Loaded ->
       case model.state of
-        Loading_YT         -> ({model | state = Loading_Cues}            ,(fetch_transcript model.current_id ))
+        Reloading_YT       -> ({model | state = Received No}              ,Cmd.none)
+        Loading_YT         -> ({model | state = Loading_Cues}             ,(fetch_transcript model.current_id ))
         _ -> doNothing model
     GotCues result ->
       case model.state of
@@ -112,24 +139,24 @@ update msg model =
     Player_Time_At second ->
       case model.state of
         Received _         -> ({model | current_position = second }       ,Cmd.none)
-        Stats _            -> ({model | current_position = second }       ,Cmd.none)
+        Stats              -> ({model | current_position = second }       ,Cmd.none)
         _ -> doNothing model
     Search_Changed new ->
       case model.state of 
         Received _         -> ({model | search_term = new }               ,Cmd.none)
-        Stats _            -> ({model | search_term = new }               ,Cmd.none)
+        Stats              -> ({model | search_term = new }               ,Cmd.none)
         _ -> doNothing model
     View_Stats ->
       case model.state of
-        Received _         -> ({model | state = Stats Word_Length, stats = count_words_once model}    ,Cmd.none)
+        Received _         -> ({model | state = Stats, stats = count_words_once model}    ,Cmd.none)
         _ -> doNothing model
     View_Cues ->
       case model.state of
-        Stats _            -> ({model | state = Received No }             ,Cmd.none)
+        Stats              -> ({model | state = Received No }             ,Cmd.none)
         _ -> doNothing model
     Reorder_Stats info ->
       case model.state of
-        Stats _            -> ({model | preferred_stats = info }          ,Cmd.none)
+        Stats              -> ({model | preferred_stats = info }          ,Cmd.none)
         _ -> doNothing model
     Clear_Field which ->
       case which of 
@@ -161,23 +188,142 @@ view model =
     ID_Invalid    -> (lazy (unloaded_elements model.input_field) "The link/ID is unrecognisable.")
     Load_Failed   -> (lazy (unloaded_elements model.input_field) "Sorry, couldn't find transcript!")
     Loading_YT    -> (lazy (unloaded_elements model.input_field) "Loading...")
+    Reloading_YT  -> (lazy (unloaded_elements model.input_field) "Loading...")
     Loading_Cues  -> (lazy (unloaded_elements model.input_field) "Loading...")
     Received edit -> 
       div [ A.class "TLE-everything" ] 
-        [ lazy (div [A.class "TLE-flex-row"]) [search_field model.search_term, delete_content F_Search "search" "Clears the search term", download_data Transcript "download-transcript" "Download the transcript as-is", stats_button]
+        [ lazy (div [A.class "TLE-flex-row"]) 
+            [ search_field model.search_term
+            , delete_content F_Search "search" "Clears the search term"
+            , download_data Transcript "download-transcript" "Download the transcript as-is"
+            , stats_button]
         , lazy (div ([ A.id "cues-container", A.class "TLE-text", A.class "TLE-container"] ) ) (List.indexedMap (generate_html_from_cue model.current_position edit model.search_term) model.cues)
         , lazy (unloaded_elements model.input_field) <| "Loaded "++model.current_id
         ]
-    Stats which   -> 
+    Stats -> 
       div [ A.class "TLE-everything" ] 
-        [ lazy (div [A.class "TLE-flex-row"]) [search_field model.search_term, delete_content F_Search "search" "Clears the search term", download_data Word_Counts "download-statistics" "Download the counted word data", cue_button, stat_view_button model.preferred_stats, stat_order_button model.preferred_stats]
+        [ lazy (div [A.class "TLE-flex-row"]) 
+            [ search_field model.search_term
+            , delete_content F_Search "search" "Clears the search term"
+            , download_data Word_Counts "download-statistics" "Download the counted word data"
+            , cue_button
+            , stat_view_button model.preferred_stats
+            , stat_order_button model.preferred_stats]
         , lazy (div ([ A.id "stats-container", A.class "TLE-text", A.class "TLE-container"] )) (display_stats model.preferred_stats <| List.map (List.sortBy Tuple.second) (model.stats))
         , lazy (unloaded_elements model.input_field) <| "Loaded "++model.current_id
         ]
 subscriptions : Model -> Sub Msg
 subscriptions _ = receive_msg_from_API loaded_or_position
 
--- Helper --
+--   JSON   --
+
+-- Custom type with payload? -- field "" string |> andThen (case string of: "FieldName" -> D.map CustomType (D.field "PayloadName" Decode.string))
+
+-- Encoding --
+
+encode_model : Model -> JE.Value
+encode_model model =
+  JE.object
+    [ ( "InputField", JE.string model.input_field )
+    , ( "CurrentId", JE.string model.current_id )
+    , ( "CurrentPosition", JE.float model.current_position )
+    , ( "SearchTerm", JE.string model.search_term )
+    , ( "Cues", JE.list encode_cue model.cues )
+    -- Stats are endless amounts of encoding work with no benefit, so I don't save them and instead sanitize the case 'state == Stats' to 'Received' on startup (see: init)
+    , ( "PreferredStats", encode_stats model.preferred_stats )
+    , ( "State", encode_state model.state )
+    ]
+    
+encode_cue : Cue -> JE.Value
+encode_cue cue = 
+  JE.object 
+    [ ( "start", JE.float cue.start )
+    , ( "duration", JE.float cue.duration )
+    , ( "content", JE.string cue.content )
+    ]
+
+encode_stats : (Stat_View, Order) -> JE.Value
+encode_stats (v, o) =
+  let 
+    stat_view =
+      case v of
+        Group_Size DESCENDING -> "GPD"
+        Group_Size ASCENDING ->  "GPA"
+        Merged              ->   "MER"
+    order =
+      case o of
+        ASCENDING -> "OA"
+        DESCENDING -> "OD"
+  in
+    JE.string (String.concat [stat_view, "+", order])
+
+encode_state : State -> JE.Value
+encode_state state =
+  case state of
+    Fresh        -> JE.string "FRESH"
+    XML_Invalid  -> JE.string "XML_ERROR"
+    ID_Invalid   -> JE.string "ID_ERROR"
+    Load_Failed  -> JE.string "LOAD_FAILED"
+    Loading_YT   -> JE.string "LOAD_FAILED" -- IMPOSSIBLE: TEST THIS!
+    Reloading_YT -> JE.string "LOAD_FAILED" -- ""
+    Loading_Cues -> JE.string "LOAD_FAILED" -- ""
+    Received _   -> JE.string "RECEIVED-NO"
+    Stats        -> JE.string "RECEIVED-NO" -- TODO: add way to start with stats state/view depite not saving them (since there's nothing user-generated in there)
+
+-- Decoding --
+
+decode_model : JD.Decoder Model
+decode_model =
+  JD.map8 Model
+    (JD.field "InputField" JD.string)
+    (JD.field "CurrentId" JD.string)
+    (JD.field "CurrentPosition" JD.float)
+    (JD.field "SearchTerm" JD.string)
+    (JD.field "Cues" (JD.list decode_cue))
+    (JD.succeed []) -- STATS
+    (JD.field "PreferredStats" JD.string |> JD.andThen decode_stats)
+    (JD.field "State" JD.string |> JD.andThen decode_state)
+    
+decode_cue : JD.Decoder Cue
+decode_cue = 
+  JD.map3 Cue
+    (JD.field "start" JD.float )
+    (JD.field "duration" JD.float )
+    (JD.field "content" JD.string)
+
+decode_stats : String -> JD.Decoder (Stat_View, Order)
+decode_stats value = 
+  let
+    make_tuple : List String -> (String, String)
+    make_tuple xs = 
+      case xs of
+        [s, o]  -> (s, o)
+        _       -> ("MER", "OD")
+    find_view s = 
+      case s of
+        "GPD" -> Group_Size DESCENDING
+        "GPA" -> Group_Size ASCENDING
+        "MER" -> Merged
+        _ -> Merged
+    find_order o =
+      case o of
+        "OD" -> DESCENDING
+        "OA" -> ASCENDING
+        _ -> DESCENDING
+    convert_tuple : (String, String) -> (Stat_View, Order)
+    convert_tuple tup = 
+      case tup of
+        (s, o) -> (find_view s, find_order o)
+  in
+    JD.succeed (String.split "+" value |> make_tuple |> convert_tuple)
+
+decode_state : String -> JD.Decoder State
+decode_state value = 
+  case value of
+    "RECEIVED-NO" -> JD.succeed (Received No)
+    _             -> JD.succeed Fresh
+
+--  Helper  --
 
 fetch_transcript : String -> Cmd Msg
 fetch_transcript video_id = 

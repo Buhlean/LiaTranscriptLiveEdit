@@ -6,16 +6,22 @@ var app;
 
 function startElm(){
   console.log("DEBUG: ElmStart");
-  app = Elm.Main.init({
-    node: document.getElementById('ElmHook')
+  let storedState = localStorage.getItem('lia-transcript-live-editor');
+  console.log("DEBUG: type: " + typeof(storedState));
+  console.log("DEBUG: stored: " + storedState);
+  if (storedState == null) {
+    app = Elm.Main.init({ flags: "",          node: document.getElementById('ElmHook') });
+  } else {
+    app = Elm.Main.init({ flags: storedState, node: document.getElementById('ElmHook') });
+  }
+  app.ports.setStorage.subscribe(function(state) {
+      localStorage.setItem('lia-transcript-live-editor', state);
   });
   console.log("DEBUG: AfterElmStart");
   app.ports.send_to_yt_API.subscribe(function(message){
     console.log("DEBUG: GotMessage! "+message);
     if (message.indexOf('ID:') !== -1) {
-      if (message.indexOf('default') !== -1) {
-        create_and_change_player('6Af6b_wyiwI'); }
-      else { create_and_change_player(message.slice(3)); } }
+     create_and_change_player(message.slice(3)); }
     else if (message.indexOf('Seek:') !== -1) {
       console.log(message);
       console.log(player);
@@ -74,7 +80,6 @@ function onYouTubeIframeAPIReady() {
   console.log("DEBUG: apiready");
   loadedAPI = true;
   create_player();
-  
 }
 function create_player() {
   player = new YT.Player('player',

@@ -15,7 +15,7 @@
       try{
         startElm();
       }catch(e){
-        console.log("Loading")
+        console.log("DEBUG: Either still loading or: " + e);
         setTimeout(startupELm, 500);
       }
     }
