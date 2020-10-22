@@ -360,13 +360,13 @@ figure_out_which_from_these : List Option -> Code_And_Name
 figure_out_which_from_these options = 
   let
     --only_english = List.filter (\o -> List.member (String.toLower o.lang_code) acceptable_language_codes) (Debug.log "ELM-parsed: " options) 
-    only_english = List.filter (\o -> List.member o.lang_code acceptable_language_codes) (options) 
+    only_english = List.filter (\o -> List.member (String.toLower o.lang_code) acceptable_language_codes) (options) 
     ordered =
       case findElem (\o -> o.lang_code == "en") only_english of
         Nothing -> only_english
         Just (en, rest) -> en::rest
   --in case (Debug.log "ELM-oneleft: " only_english) of 
-  in case only_english of 
+  in case ordered of 
     [] ->                        Unavailable
     chosen::xs ->                     
       if chosen.name == "" then No_Name     chosen.lang_code
@@ -763,12 +763,3 @@ findElem p ls =
         _    -> Nothing
   in
     find id ls
-{--
-findElem       :: (a -> Bool) -> [a] -> Maybe (a, [a])
-findElem p     = find id
-    where
-      find _ []         = Nothing
-      find prefix (x : xs)
-          | p x          = Just (x, prefix xs)
-          | otherwise    = find (prefix . (x:)) xs
---}

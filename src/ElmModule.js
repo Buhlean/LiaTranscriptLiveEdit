@@ -6874,11 +6874,15 @@ var $elm$core$List$member = F2(
 			},
 			xs);
 	});
+var $elm$core$String$toLower = _String_toLower;
 var $author$project$Main$figure_out_which_from_these = function (options) {
 	var only_english = A2(
 		$elm$core$List$filter,
 		function (o) {
-			return A2($elm$core$List$member, o.D, $author$project$Main$acceptable_language_codes);
+			return A2(
+				$elm$core$List$member,
+				$elm$core$String$toLower(o.D),
+				$author$project$Main$acceptable_language_codes);
 		},
 		options);
 	var ordered = function () {
@@ -6897,11 +6901,11 @@ var $author$project$Main$figure_out_which_from_these = function (options) {
 			return A2($elm$core$List$cons, en, rest);
 		}
 	}();
-	if (!only_english.b) {
+	if (!ordered.b) {
 		return $author$project$Main$Unavailable;
 	} else {
-		var chosen = only_english.a;
-		var xs = only_english.b;
+		var chosen = ordered.a;
+		var xs = ordered.b;
 		return (chosen.P === '') ? $author$project$Main$No_Name(chosen.D) : A2($author$project$Main$Both_Custom, chosen.D, chosen.P);
 	}
 };
@@ -9691,7 +9695,6 @@ var $ChristophP$elm_mark$Internal$stringIndexes = F2(
 			term,
 			A2($elm$core$String$indexes, term, content));
 	});
-var $elm$core$String$toLower = _String_toLower;
 var $ChristophP$elm_mark$Internal$stringIndexesIgnoreCase = F2(
 	function (term, content) {
 		return A2(
