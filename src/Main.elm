@@ -11,7 +11,7 @@ import XmlParser exposing (Node(..))
 import String.Mark as Mark
 import File.Download as Download
 
-import Debug
+--import Debug
 
 main 
   = Browser.element
@@ -25,6 +25,14 @@ type alias Cue =
   { start : Float
   , duration : Float
   , content : String
+  }
+  
+type alias Option =
+  { num : String
+  , name : String
+  , lang_code : String
+  , lang_original : String
+  , lang_translated : String
   }
 
 type alias Model = 
@@ -46,6 +54,7 @@ type alias Preferences = (Stat_View, Order)
 type Stat_View = Group_Size Order | Merged 
 type Order = ASCENDING | DESCENDING
 type Download = Transcript | Word_Counts
+type Code_And_Name = Both_Custom String String | No_Name String | Unavailable
 type alias ID = String
 
 type Error
@@ -57,6 +66,7 @@ type Msg
   = ID_Changed String
   | Cue_Changed Int String
   | Validate_And_Fetch
+  | GotList (Result Http.Error String)
   | GotCues (Result Http.Error String)
   | Player_Loaded
   | Player_Time_At Float
@@ -73,6 +83,9 @@ port send_to_yt_API       : String -> Cmd msg
 port receive_msg_from_API : (Float -> msg) -> Sub msg
 
 port setStorage           : String -> Cmd msg -- String means JSON String here
+
+acceptable_language_codes : List String
+acceptable_language_codes = ["en", "en-au", "en-bz", "en-ca", "en-gb", "en-ie", "en-jm", "en-nz", "en-tt", "en-us", "en-za"]
 
 empty_model : Model
 empty_model = 
@@ -95,7 +108,7 @@ init maybe_model =
         Received _ -> (model, send_to_yt_API <| ("ID:"++model.current_id))
         _          -> (model, Cmd.none)
   in
-    case JD.decodeString decode_model (Debug.log "stored_data:" maybe_model) of
+    case JD.decodeString decode_model (maybe_model) of
       Ok  v -> determine_if_player_needs_reloading v
       Err e -> (empty_model, Cmd.none)
 
@@ -108,14 +121,32 @@ update_with_storage msg model =
     ( newModel
     , Cmd.batch [ setStorage (JE.encode 0 (encode_model newModel)), cmds ]
     )
-
+  
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     Player_Loaded ->
       case model.state of
         Reloading_YT       -> ({model | state = Received No}              ,Cmd.none)
-        Loading_YT         -> ({model | state = Loading_Cues}             ,(fetch_transcript model.current_id ))
+        Loading_YT         -> ({model | state = Loading_Cues}             ,Http.get { url = "https://video.google.com/timedtext?type=list&v=" ++ model.current_id, expect = Http.expectString GotList })
+        _ -> doNothing model
+    GotList result ->
+      case model.state of
+        Loading_Cues ->
+          case result of
+            Ok fullList -> 
+              case parse_list fullList of 
+                Nothing    -> ({model | state = XML_Invalid }             ,Cmd.none)
+                Just options -> 
+                  case figure_out_which_from_these options of
+                    Unavailable                           -> ({model | state = Load_Failed }        ,Cmd.none)
+                    No_Name language_code                 -> 
+                      ( model, Http.get { url = "https://video.google.com/timedtext?v=" ++ model.current_id ++ "&lang=" ++ language_code
+                      , expect = Http.expectString GotCues })
+                    Both_Custom language_code name_option -> 
+                      ( model, Http.get { url = "https://video.google.com/timedtext?v=" ++ model.current_id ++ "&lang=" ++ language_code ++ "&name=" ++ name_option
+                      , expect = Http.expectString GotCues })
+            Err _ -> ({model | state = Load_Failed }, Cmd.none)
         _ -> doNothing model
     GotCues result ->
       case model.state of
@@ -186,7 +217,7 @@ view model =
     Fresh         -> (lazy (unloaded_elements model.input_field) "")
     XML_Invalid   -> (lazy (unloaded_elements model.input_field) "Sorry, couldn't parse transcript!")
     ID_Invalid    -> (lazy (unloaded_elements model.input_field) "The link/ID is unrecognisable.")
-    Load_Failed   -> (lazy (unloaded_elements model.input_field) "Sorry, couldn't find transcript!")
+    Load_Failed   -> (lazy (unloaded_elements model.input_field) "No handmade english transcript found, sorry.")
     Loading_YT    -> (lazy (unloaded_elements model.input_field) "Loading...")
     Reloading_YT  -> (lazy (unloaded_elements model.input_field) "Loading...")
     Loading_Cues  -> (lazy (unloaded_elements model.input_field) "Loading...")
@@ -325,9 +356,21 @@ decode_state value =
 
 --  Helper  --
 
-fetch_transcript : String -> Cmd Msg
-fetch_transcript video_id = 
-  Http.get  { url = "https://video.google.com/timedtext?v=" ++ video_id ++ "&lang=en", expect = Http.expectString GotCues }
+figure_out_which_from_these : List Option -> Code_And_Name
+figure_out_which_from_these options = 
+  let
+    --only_english = List.filter (\o -> List.member (String.toLower o.lang_code) acceptable_language_codes) (Debug.log "ELM-parsed: " options) 
+    only_english = List.filter (\o -> List.member o.lang_code acceptable_language_codes) (options) 
+    ordered =
+      case findElem (\o -> o.lang_code == "en") only_english of
+        Nothing -> only_english
+        Just (en, rest) -> en::rest
+  --in case (Debug.log "ELM-oneleft: " only_english) of 
+  in case only_english of 
+    [] ->                        Unavailable
+    chosen::xs ->                     
+      if chosen.name == "" then No_Name     chosen.lang_code
+      else                       Both_Custom chosen.lang_code chosen.name 
 
 unloaded_elements : String -> String -> Html Msg
 unloaded_elements input_field msg = 
@@ -348,9 +391,9 @@ tooltip_button = a
   ] [text "i"]
   
 url_field : String -> Html Msg
-url_field id = input 
+url_field vid_id = input 
   [ A.placeholder "Please provide a YouTube link/ID."
-  , A.value id
+  , A.value vid_id
   , onInput ID_Changed
   , onEnter Validate_And_Fetch
   , A.id "input-video-url-or-id"
@@ -438,7 +481,6 @@ stat_order_button   (how, ord) =
   , A.class "TLE-top-elements"
   ] [ text "\u{21C5}" ]
   
-
 package_and_download : Download -> Model -> Cmd Msg
 package_and_download dl model =
   case dl of
@@ -505,7 +547,7 @@ butcher_URL url cut1 cut2 error =
   case (String.split cut1 url) of
       head::tail::[] -> 
         case (String.split cut2 tail) of
-          id::xs -> Ok id
+          vid_id::xs -> Ok vid_id
           _ -> Err error
       _ -> Err error
 
@@ -526,26 +568,42 @@ parse_xml xml =
         (Element text attributes cue_nodes) ->
           Just (empty_cue :: (corral_cues cue_nodes))
 
+parse_list : String -> Maybe (List Option)
+parse_list xml =
+  --case XmlParser.parse (Debug.log "ELM-rawxml: " xml) of
+  case XmlParser.parse xml of
+  Err error ->
+    Nothing
+  Ok result ->
+    case result.root of
+      (Text text) ->
+        Nothing
+      (Element text attributes option_nodes) ->
+        Just (corral_options option_nodes)
+
 corral_cues : List Node -> List Cue
 corral_cues nodes = 
   case nodes of
-    [] -> []
-    [cue] -> 
-      [extract_information cue]
+    []      -> []
+    [cue]   -> [extract_information cue]
     c1::c2::c3::c4::c5::c6::c7::c8::xs -> -- this is to prevent recursion limit problems for very long videos.
       List.append 
-        (  funnel_cue c1
-        ++ funnel_cue c2
-        ++ funnel_cue c3
-        ++ funnel_cue c4
-        ++ funnel_cue c5
-        ++ funnel_cue c6
-        ++ funnel_cue c7
-        ++ funnel_cue c8
-        ) 
-        (corral_cues xs) 
-    cue::xs ->
-      funnel_cue cue ++ corral_cues xs
+        ( funnel_cue c1 ++ funnel_cue c2 ++ funnel_cue c3 ++ funnel_cue c4 ++ funnel_cue c5 ++ funnel_cue c6 ++ funnel_cue c7 ++ funnel_cue c8 ) 
+        ( corral_cues xs ) 
+    cue::xs -> funnel_cue cue ++ corral_cues xs
+    
+corral_options : List Node -> List Option
+corral_options nodes = 
+  --case (Debug.log "ELM-nodes: " nodes) of
+  case nodes of
+    []      -> []
+    [option]   -> [extract_option option]
+    option::xs -> 
+      case option of
+        Text text ->
+          []
+        Element text attr content ->
+          [extract_option option] ++ corral_options xs
 
 funnel_cue : Node -> List Cue
 funnel_cue node = 
@@ -565,8 +623,24 @@ extract_information node =
       }
     _ -> empty_cue
 
+extract_option : Node -> Option
+extract_option node =
+  --case (Debug.log "ELM-node: " node) of
+  case node of
+    Element _ ( num :: name :: lang_code :: lang_original :: lang_translated :: xs) _ ->
+      { num              = (num.value)
+      , name            = (name.value)
+      , lang_code       = (lang_code.value)
+      , lang_original   = (lang_original.value)
+      , lang_translated = (lang_translated.value)
+      }
+    _ -> empty_option
+
 empty_cue : Cue
 empty_cue = {start=0.0, duration=0.0, content=">> "}
+
+empty_option : Option
+empty_option = {num="", name="", lang_code="", lang_original="", lang_translated=""}
 
 toFloat_with_default : String -> Float -> Float
 toFloat_with_default string def =
@@ -607,14 +681,6 @@ tally_in_sorted_list a_list =
 
 count_in_sorted_list : a -> List a -> Int
 count_in_sorted_list x xs = List.length (takeWhile ((==)x) xs)
-
-takeWhile : (a -> Bool) -> List a -> List a 
-takeWhile cond a_list = 
-  case a_list of
-    []   -> []
-    x::xs -> 
-      if cond x then x :: takeWhile cond xs
-      else [] 
 
 cull_list : List (String, Int) -> List (String, Int)
 cull_list the_list = List.filter (filter_occurrences) the_list
@@ -672,3 +738,37 @@ merge_keep_order list_a list_b =
       else
         y :: merge_keep_order (x::xs) (ys)
 
+---- HOOGLE BE BLESSED ----
+
+id : a -> a
+id a = a
+
+takeWhile : (a -> Bool) -> List a -> List a 
+takeWhile cond a_list = 
+  case a_list of
+    []   -> []
+    x::xs -> 
+      if cond x then x :: takeWhile cond xs
+      else [] 
+
+findElem      : (a -> Bool) -> List a -> Maybe (a, List a)
+findElem p ls =
+  let
+    find prefix xss =
+      case xss of
+        x::xs -> 
+          if (p x)
+          then Just (x, prefix xs)
+          else find (prefix << ((::) x)) xs
+        _    -> Nothing
+  in
+    find id ls
+{--
+findElem       :: (a -> Bool) -> [a] -> Maybe (a, [a])
+findElem p     = find id
+    where
+      find _ []         = Nothing
+      find prefix (x : xs)
+          | p x          = Just (x, prefix xs)
+          | otherwise    = find (prefix . (x:)) xs
+--}
