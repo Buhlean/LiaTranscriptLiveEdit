@@ -43,6 +43,7 @@ type alias Model =
   , cues : List Cue
   , stats : List(List(String, Int))
   , preferred_stats : (Stat_View, Order)
+  , hide_stat_rubble : Hide
   , state : State
   }
 
@@ -52,6 +53,7 @@ type Editing = No | Yes Int
 type Field = F_LinkID | F_Search
 type alias Preferences = (Stat_View, Order)
 type Stat_View = Group_Size Order | Merged 
+type Hide = Top1 | Top3 | Top6 | All
 type Order = ASCENDING | DESCENDING
 type Download = Transcript | Word_Counts
 type Code_And_Name = Both_Custom String String | No_Name String | Unavailable
@@ -78,6 +80,7 @@ type Msg
   | Clear_Field Field
   | Download_Data Download
   | Reorder_Stats (Stat_View, Order)
+  | Show_or_Hide Hide
 
 port send_to_yt_API       : String -> Cmd msg
 port receive_msg_from_API : (Float -> msg) -> Sub msg
@@ -96,6 +99,7 @@ empty_model =
   , cues = []
   , stats = []
   , preferred_stats = (Merged, DESCENDING)
+  , hide_stat_rubble = Top1
   , state = Fresh
   }
 
@@ -189,6 +193,10 @@ update msg model =
       case model.state of
         Stats              -> ({model | preferred_stats = info }          ,Cmd.none)
         _ -> doNothing model
+    Show_or_Hide info ->
+      case model.state of
+        Stats              -> ({model | hide_stat_rubble = info }         ,Cmd.none)
+        _ -> doNothing model
     Clear_Field which ->
       case which of 
         F_Search           -> ({model | search_term = "" }                ,Cmd.none)
@@ -238,9 +246,13 @@ view model =
             , delete_content F_Search "search" "Clears the search term"
             , download_data Word_Counts "download-statistics" "Download the counted word data"
             , cue_button
+            , sorting_note "Sort by"
             , stat_view_button model.preferred_stats
-            , stat_order_button model.preferred_stats]
-        , lazy (div ([ A.id "stats-container", A.class "TLE-text", A.class "TLE-container"] )) (display_stats model.preferred_stats <| List.map (List.sortBy Tuple.second) (model.stats))
+            , stat_order_button model.preferred_stats
+            , count_note "Show"
+            , hide_rubble_button model.hide_stat_rubble
+            ]
+        , lazy (div ([ A.id "stats-container", A.class "TLE-text", A.class "TLE-container"] )) [(display_stats model.preferred_stats model.hide_stat_rubble <| List.map (List.sortBy Tuple.second) (model.stats))]
         , lazy (unloaded_elements model.input_field) <| "Loaded "++model.current_id
         ]
 subscriptions : Model -> Sub Msg
@@ -260,8 +272,9 @@ encode_model model =
     , ( "CurrentPosition", JE.float model.current_position )
     , ( "SearchTerm", JE.string model.search_term )
     , ( "Cues", JE.list encode_cue model.cues )
-    -- Stats are endless amounts of encoding work with no benefit, so I don't save them and instead sanitize the case 'state == Stats' to 'Received' on startup (see: init)
+    -- Stats are endless amounts of encoding work with no benefit, so I don't save them and instead sanitize the case 'state == Stats' to 'Received' on startup (also see: init)
     , ( "PreferredStats", encode_stats model.preferred_stats )
+    , ( "Show_Stats", encode_show_stats model.hide_stat_rubble) -- Decoder has limitation of map8, so saving this is postponed
     , ( "State", encode_state model.state )
     ]
     
@@ -287,6 +300,14 @@ encode_stats (v, o) =
         DESCENDING -> "OD"
   in
     JE.string (String.concat [stat_view, "+", order])
+    
+encode_show_stats : (Hide) -> JE.Value
+encode_show_stats h =
+  case h of
+    Top1 -> JE.int 1
+    Top3 -> JE.int 3
+    Top6 -> JE.int 6
+    All  -> JE.int 201
 
 encode_state : State -> JE.Value
 encode_state state =
@@ -303,17 +324,28 @@ encode_state state =
 
 -- Decoding --
 
+decodeApply = JD.map2 (|>)
+
+required : String -> JD.Decoder a -> JD.Decoder (a -> b) -> JD.Decoder b
+required fieldName itemDecoder functionDecoder =
+  decodeApply (JD.field fieldName itemDecoder) functionDecoder
+  
+hardcoded : a -> JD.Decoder (a -> b) -> JD.Decoder b
+hardcoded a =
+  decodeApply (JD.succeed a)
+  
 decode_model : JD.Decoder Model
 decode_model =
-  JD.map8 Model
-    (JD.field "InputField" JD.string)
-    (JD.field "CurrentId" JD.string)
-    (JD.field "CurrentPosition" JD.float)
-    (JD.field "SearchTerm" JD.string)
-    (JD.field "Cues" (JD.list decode_cue))
-    (JD.succeed []) -- STATS
-    (JD.field "PreferredStats" JD.string |> JD.andThen decode_stats)
-    (JD.field "State" JD.string |> JD.andThen decode_state)
+  JD.succeed Model
+    |> required "InputField" JD.string
+    |> required "CurrentId" JD.string
+    |> required "CurrentPosition" JD.float
+    |> required "SearchTerm" JD.string
+    |> required "Cues" (JD.list decode_cue)
+    |> hardcoded [] -- STATS
+    |> required "PreferredStats" (JD.string |> JD.andThen decode_stats)
+    |> required "Show_Stats" (JD.int |> JD.andThen decode_hide)
+    |> required "State" (JD.string |> JD.andThen decode_state)
     
 decode_cue : JD.Decoder Cue
 decode_cue = 
@@ -347,6 +379,14 @@ decode_stats value =
         (s, o) -> (find_view s, find_order o)
   in
     JD.succeed (String.split "+" value |> make_tuple |> convert_tuple)
+
+decode_hide : Int -> JD.Decoder Hide
+decode_hide value =
+  case value of
+    1 -> JD.succeed Top1
+    3 -> JD.succeed Top3
+    6 -> JD.succeed Top6
+    _ -> JD.succeed All
 
 decode_state : String -> JD.Decoder State
 decode_state value = 
@@ -407,6 +447,7 @@ fetch_button = button
   , A.id "button-fetches-transcript-by-id"
   , A.title "Fetch the video and its transcript"
   , A.class "TLE-top-elements"
+  , A.class "TLE-button"
   ] [ text "Fetch" ]
 stats_button : Html Msg
 stats_button = button 
@@ -414,6 +455,7 @@ stats_button = button
   , A.id "button-switches-to-stats-view"
   , A.title "View statistics about this transcript"
   , A.class "TLE-top-elements"
+  , A.class "TLE-button"
   ] [ text "Display Stats" ]
 cue_button : Html Msg
 cue_button = button 
@@ -421,6 +463,7 @@ cue_button = button
   , A.id "button-switches-to-cues-view"
   , A.title "Go back to the transcript"
   , A.class "TLE-top-elements"
+  , A.class "TLE-button"
   ] [ text "Display Transcript" ]
   
 delete_content : Field -> String -> String -> Html Msg
@@ -430,6 +473,7 @@ delete_content field name title = button
   , A.title title
   , A.class "TLE-top-elements"
   , A.class "TLE-X-delete"
+  , A.class "TLE-button"
   ] [text "X"]
 download_data : Download -> String -> String -> Html Msg
 download_data download name title = button 
@@ -438,10 +482,17 @@ download_data download name title = button
   , A.title title
   , A.class "TLE-top-elements"
   , A.class "TLE-download-button"
+  , A.class "TLE-button"
   ] [text "Download"]
 
 status_message : String -> Html Msg
 status_message message = span [ A.class "TLE-top-elements"] [text message]
+
+sorting_note : String -> Html Msg
+sorting_note message = span [ A.class "TLE-top-elements"] [text message]
+
+count_note : String -> Html Msg
+count_note message = span [ A.class "TLE-top-elements"] [text message]
   
 search_field : String -> Html Msg
 search_field search_term = input 
@@ -465,6 +516,7 @@ stat_view_button   (how, ord) =
   , A.id "button-switches-to-cues-view"
   , A.title "Switch between: ordered by word count or all in one list"
   , A.class "TLE-top-elements"
+  , A.class "TLE-button"
   ] [ text label ]
   
 stat_order_button : (Stat_View, Order) -> Html Msg
@@ -479,7 +531,26 @@ stat_order_button   (how, ord) =
   , A.id "button-change-stats-order"
   , A.title "Switch between Ascending and Descending order"
   , A.class "TLE-top-elements"
+  , A.class "TLE-button"
   ] [ text "\u{21C5}" ]
+
+hide_rubble_button : Hide -> Html Msg
+hide_rubble_button info =
+  let 
+    (next, label) = 
+      case info of
+        Top1 -> (Top3, "Top 10")
+        Top3 -> (Top6, "Top 30")
+        Top6 -> (All , "Top 60") 
+        All  -> (Top1, "All")
+  in button 
+    [ onClick (Show_or_Hide next)
+    , A.class "TLE-top-elements"
+    , A.class "TLE-button"
+    , A.id "button-show-or-hide-stats"
+    , A.title "Click to cycle through filter options"
+    ]
+    [ text label ]
   
 package_and_download : Download -> Model -> Cmd Msg
 package_and_download dl model =
@@ -697,8 +768,8 @@ count_words_once model =
     Nothing -> haeufigkeitsanalyse model.cues
     Just _  -> model.stats
 
-display_stats : (Stat_View, Order) -> List(List(String, Int)) -> List(Html Msg)
-display_stats (how, ord) data = 
+display_stats : (Stat_View, Order) -> Hide -> List(List(String, Int)) -> Html Msg
+display_stats (how, ord) hide data = 
   let 
     structured_data =
       case how of
@@ -707,26 +778,17 @@ display_stats (how, ord) data =
             ASCENDING  -> data
             DESCENDING -> List.reverse data
         Merged -> [List.foldl (merge_keep_order) [] data]
+        
+    ordered_data : List(List(String, Int))
     ordered_data = 
       case ord of
         ASCENDING  -> structured_data
         DESCENDING -> List.map List.reverse structured_data 
     
   in
-    create_stats_entries ordered_data
-
-create_stats_entries : List(List(String, Int)) -> List(Html Msg)
-create_stats_entries data =
-  case data of
-    []      -> []
-    xs::xss -> (create_stats_entry xs) ++ (create_stats_entries xss)
+    create_stats_entries ordered_data hide
     
-create_stats_entry : List(String, Int) -> List(Html Msg)
-create_stats_entry data =
-  case data of
-    []    -> []
-    (w,c)::xs -> [div [A.class "TLE-stats-entry"] [span [A.class "TLE-stats-count"] [text <| (String.fromInt c)++"x"], span [A.class "TLE-stats-word"] [text w]]]++create_stats_entry xs
-
+-- merges the 3 lists by occurences (only used for merged list)
 merge_keep_order : List (String, Int) -> List (String, Int) -> List (String, Int)
 merge_keep_order list_a list_b =
   case (list_a, list_b) of
@@ -738,7 +800,63 @@ merge_keep_order list_a list_b =
       else
         y :: merge_keep_order (x::xs) (ys)
 
----- HOOGLE BE BLESSED ----
+-- please rewrite holy moly the new Hide feature screwed this up real bad - beyond here be dragons
+create_stats_entries : List(List(String, Int)) -> Hide -> Html Msg
+create_stats_entries data hide =
+  case data of
+    []      -> stats_div []
+    -- Merged
+    xs::[]  -> 
+      case hide of
+        Top1 -> stats_div (create_stats_entry (List.take 10 xs))
+        Top3 -> stats_div (create_stats_entry (List.take 30 xs))
+        Top6 -> stats_div (create_stats_entry (List.take 60 xs))
+        All  -> stats_div (create_stats_entry xs)
+    -- Any separate
+    xs1::xs2::xs3::[] -> 
+      case hide of
+        Top1 -> stats_div (create_stats_entry (List.take 10 xs1))
+        Top3 -> stats_div <| (create_stats_entry (List.take 10 xs1)) ++ (create_stats_entry (List.take 10 xs2)) ++ (create_stats_entry (List.take 10 xs3)) 
+        Top6 -> stats_div <| (create_stats_entry (List.take 20 xs1)) ++ (create_stats_entry (List.take 20 xs2)) ++ (create_stats_entry (List.take 20 xs3)) 
+        All  -> stats_div <| (create_stats_entry xs1) ++ (create_stats_entry xs2) ++ (create_stats_entry xs3) 
+    _ -> stats_div []
+    
+stats_div : List(Html Msg) -> Html Msg
+stats_div list = div [ A.class "TLE-stats-container" ] ( list )
+    
+create_stats_entry : List(String, Int) -> List(Html Msg)
+create_stats_entry data =
+  case data of
+    [] -> []
+    xs -> 
+      column_div (fill_stats_flex_column (List.take (10) (data))) ++ 
+      create_stats_entry (List.drop (10) (data)) 
+    
+column_div : List(Html Msg) -> List(Html Msg)
+column_div lines = 
+  [ div
+    [ A.class "TLE-stats-column" ]
+    ( lines )
+  ]
+
+fill_stats_flex_column : List(String, Int) -> List(Html Msg)
+fill_stats_flex_column batch =
+  case batch of
+    []        -> []
+    (w,c)::xs -> 
+      [ div 
+        [ A.class "TLE-stats-line" ] 
+        [ span 
+          [ A.class "TLE-stats-count" ] 
+          [ text <| (String.fromInt c)++"x" ]
+        , span 
+          [ A.class "TLE-stats-word" ] 
+          [ text w ]
+        ]
+      ] ++ fill_stats_flex_column xs
+
+---- HOOGLE BE BLESSED! ----
+---- hoogle.haskell.org ----
 
 id : a -> a
 id a = a
